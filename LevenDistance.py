@@ -46,7 +46,7 @@ def main():
 				sub = row
 				sub[0].replace('\ufeff', '')
 				#compare
-				if sub[0] != '\ufeffTeam NameTeam Name':
+				if sub[0] != '\ufeffTeam Name':
 					result = []
 					for i in range(1, len(sub), 1):
 						result.append(LD(answersCSV[i-1], sub[i]))
