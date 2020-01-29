@@ -32,8 +32,7 @@ def main():
 		readCSV = csv.reader(csvfile, delimiter=',')
 		answersCSV = next(readCSV)
 
-	print(answersCSV)
-	
+
 
 	#read submission and compare and output to csv file
 	with open('sample_grading.csv', mode='w') as output_file:
@@ -46,16 +45,12 @@ def main():
 			for row in readCSV:
 				sub = row
 				sub[0].replace('\ufeff', '')
-				print(sub)
-				print("LOL")
-				print(sub[0])
 				#compare
 				if sub[0] != '\ufeffTeam NameTeam Name':
 					result = []
 					for i in range(1, len(sub), 1):
 						result.append(LD(answersCSV[i-1], sub[i]))
 					result.insert(0, sub[0])
-					print(result)
 					output.writerow(result)
 
 
