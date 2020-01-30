@@ -1,0 +1,9 @@
+MouseInfo==0.1.2
+Pillow==7.0.0
+PyAutoGUI==0.9.48
+PyGetWindow==0.0.8
+PyMsgBox==1.0.7
+pyperclip==1.7.0
+PyRect==0.1.4
+PyScreeze==0.1.26
+PyTweening==1.0.3
