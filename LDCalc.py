@@ -11,7 +11,7 @@ class answerReader:
         with open(txtName) as txt:
             aDict = OrderedDict()
             # Reading all lines in A.txt into keysAndVals
-            keysAndVals = txt.readlines()
+            keysAndValsOG = txt.readlines()
             i = 0
             key = []  # Seperate array to store keys
             val = []  # Seperate array to store values
@@ -22,7 +22,28 @@ class answerReader:
                 else if a(val) == ':':
                     a(semiPos) = '\n'
             '''
-
+            ii = 0
+            semiPos = 0;
+            for value in keysAndValsOG[0]:
+                print(keysAndValsOG[0][ii])
+            
+                if keysAndValsOG[0][ii] == ';':
+                    semiPos = ii
+                    print("; Found at ")
+                    print(semiPos)
+                elif keysAndValsOG[0][ii] == ':':
+                    if (semiPos != 0):
+                        print("------------------")
+                        print(keysAndValsOG[0][semiPos])
+                        print("------------------")
+                        keysAndValsOG[0][semiPos] = 'B'
+                    print(": Found at ")
+                    print(ii)
+                
+                
+                ii += 1
+            print(keysAndValsOG)
+            keysAndVals = keysAndValsOG
 
             for value in keysAndVals:
                 keyVal1st = keysAndVals[i].split(":")
@@ -96,5 +117,6 @@ class levenshteinD:
         return avgDistDouble
 
 
-avgDist = levenshteinD.distanceCalc()
+#avgDist = levenshteinD.distanceCalc()
+answerReader.reader("realA.txt")
 print(avgDist)
