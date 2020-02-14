@@ -25,7 +25,7 @@ class answerReader:
                     semiPos = ii
                 elif keysAndValsOG[0][ii] == ':':
                     if (semiPos != 0):
-                        keysAndVals[0] = keysAndValsOG[0][0:semiPos] + '|' + keysAndValsOG[0][(semiPos+1):]                
+                        keysAndVals[0] = keysAndValsOG[0][0:semiPos] + '|' + keysAndValsOG[0][(semiPos+1):]
                 ii += 1
             keysAndVals = keysAndValsOG[0].split("|")
 
@@ -89,7 +89,9 @@ class levenshteinD:
         for key in frameAnsCombList:
             ansMacMatchInd = 0
             for ansMacMatch in frameAnsCombList[keyInd]:
-                frameAnsCombList[keyInd][ansMacMatchInd] = [[real, gen] for real in frameAnsCombList[keyInd][ansMacMatchInd][0] for gen in frameAnsCombList[keyInd][ansMacMatchInd][1]]
+                frameAnsCombList[keyInd][ansMacMatchInd] = [[real, gen] for real in \
+                    frameAnsCombList[keyInd][ansMacMatchInd][0] for gen in \
+                        frameAnsCombList[keyInd][ansMacMatchInd][1]]
                 ansMacMatchInd += 1
             keyInd += 1
         '''
@@ -109,10 +111,13 @@ class levenshteinD:
                     print(keyInd)
                     print(ansMacMatchInd)
                     print(ansInnMatchInd)
-                    print(distance(distList[keyInd][ansMacMatchInd][ansInnMatchInd][0],distList[keyInd][ansMacMatchInd][ansInnMatchInd][1]))
+                    print(distance(distList[keyInd][ansMacMatchInd][ansInnMatchInd][0], \
+                        distList[keyInd][ansMacMatchInd][ansInnMatchInd][1]))
                     print(distList)
                     '''
-                    distList[keyInd][ansMacMatchInd][ansInnMatchInd] = distance(distList[keyInd][ansMacMatchInd][ansInnMatchInd][0],distList[keyInd][ansMacMatchInd][ansInnMatchInd][1])
+                    distList[keyInd][ansMacMatchInd][ansInnMatchInd] = distance \
+                        (distList[keyInd][ansMacMatchInd][ansInnMatchInd][0], \
+                            distList[keyInd][ansMacMatchInd][ansInnMatchInd][1])
                     ansInnMatchInd += 1
                 ansMacMatchInd += 1
             keyInd += 1
@@ -140,17 +145,23 @@ class levenshteinD:
                     if distList[keyInd][minI] > distList[keyInd][j]:
                         minI = j
                 # Swap the found minimum element with minI       
-                distList[keyInd][i], distList[keyInd][minI] = distList[keyInd][minI], distList[keyInd][i] 
+                distList[keyInd][i], distList[keyInd][minI] = distList[keyInd][minI],\
+                    distList[keyInd][i] 
+            keyInd += 1
         #print(distList)
 
         # Creating a related array to distList with the number of words per key in realADict
         totalWord = []
         for key in realADict:
             totalWordInKey = []
-            for val in realADict[key]:
-                #print(len(realADict[key]))
+            '''
+            for val in realADict:
+                print(key)
+                print(realADict[key])
                 totalWordInKey.append(len(realADict[key]))
             totalWord.append(sum(totalWordInKey))
+            '''
+            totalWord.append(len(realADict[key]))
         #print(totalWord)
 
         # Calculating total Levenshtein Distance per key in distListSumOfKey list 
