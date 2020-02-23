@@ -71,10 +71,10 @@ class answerReader:
 
 class levenshteinD:
     # Method to calculate the distance between the values between two dictionaries
-    def distanceCalc():
+    def distanceCalc(realATxtName, aTxtName):
         # Initializing variables and calling reader
-        realADict = answerReader.reader("realA.txt")
-        aDict = answerReader.reader("A.txt")
+        realADict = answerReader.reader(realATxtName)
+        aDict = answerReader.reader(aTxtName)
         distList = []
         totAns = 0
         avgDistDouble = None
@@ -181,6 +181,6 @@ class levenshteinD:
         
         return avgDistDouble
 
-print("Import levenshteinD and answerReader classes instead and run levenshteinD.distanceCalc()")
-avgDist = levenshteinD.distanceCalc()
+#print("Import levenshteinD and answerReader classes instead and run levenshteinD.distanceCalc()")
+avgDist = levenshteinD.distanceCalc("realA.txt", "A.txt")
 print("The error of the solution is: %f" %(avgDist))
