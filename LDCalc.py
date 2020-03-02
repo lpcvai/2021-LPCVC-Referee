@@ -1,6 +1,7 @@
 # install with pip3 install python-Levenshtein
 from Levenshtein import distance
 from collections import OrderedDict
+import itertools
 
 
 # Method to read a text file: "txtName"
@@ -66,117 +67,60 @@ def reader(txtName):
         '''
     return dict
 
+def flatten(data):
+    merged = list(itertools.chain(*data))
+    return merged
 
 # Method to calculate the distance between the values between two dictionaries
 def distanceCalc(realATxtName, aTxtName):
     # Initializing variables and calling reader
-    realADict = answerReader.reader(realATxtName)
-    aDict = answerReader.reader(aTxtName)
+    realADict = reader(realATxtName)
+    aDict = reader(aTxtName)
+    for key in aDict.keys():
+        if aDict[key] == [[]]:
+            aDict[key] = [[""]]
     distList = []
     totAns = 0
     avgDistDouble = None
 
     # Creating combinations of different answers for each key
     frameAnsCombList = []
+    #print(realADict)
     for key in realADict:
-        frameAnsCombinations = [[real, gen] for real in realADict[key] for gen in aDict[key]]
-        #print(frameAnsCombinations)
-        frameAnsCombList.append(frameAnsCombinations)
-    keyInd = 0
-    for key in frameAnsCombList:
-        ansMacMatchInd = 0
-        for ansMacMatch in frameAnsCombList[keyInd]:
-            frameAnsCombList[keyInd][ansMacMatchInd] = [[real, gen] for real in \
-                frameAnsCombList[keyInd][ansMacMatchInd][0] for gen in \
-                    frameAnsCombList[keyInd][ansMacMatchInd][1]]
-            ansMacMatchInd += 1
-        keyInd += 1
-    '''
-    print("-----------------------")
-    print(frameAnsCombList[0][0][0])
-    '''
-    # Creating list of distances between each possible combination of answers to each key
-    distList = frameAnsCombList
-    keyInd = 0
-    for key in frameAnsCombList:
-        ansMacMatchInd = 0
-        for ansMacMatch in frameAnsCombList[keyInd]:
-            ansInnMatchInd = 0
-            for ansInnMatch in frameAnsCombList[keyInd][ansMacMatchInd]:
-                '''
-                print("--------------------------------")
-                print(keyInd)
-                print(ansMacMatchInd)
-                print(ansInnMatchInd)
-                print(distance(distList[keyInd][ansMacMatchInd][ansInnMatchInd][0], \
-                    distList[keyInd][ansMacMatchInd][ansInnMatchInd][1]))
-                print(distList)
-                '''
-                distList[keyInd][ansMacMatchInd][ansInnMatchInd] = distance \
-                    (distList[keyInd][ansMacMatchInd][ansInnMatchInd][0], \
-                        distList[keyInd][ansMacMatchInd][ansInnMatchInd][1])
-                ansInnMatchInd += 1
-            ansMacMatchInd += 1
-        keyInd += 1
+        allRealAnswers = flatten(realADict[key])
+        allAnswers = flatten(aDict[key])
+        for realAnswer in allRealAnswers:
+            currFrame = []
+            for answer in allAnswers:
+                currFrame.append([realAnswer, answer])
+            frameAnsCombList.append(currFrame)
 
-    # Flattening distList (There is unecessary nested lists right now)
-    keyInd = 0
-    for key in distList:
-        flatRealADictStr = []
-        for sublist in distList[keyInd]:
-            for val in sublist:
-                flatRealADictStr.append(val)
-        distList[keyInd] = flatRealADictStr
-        keyInd += 1
-    #print("---------------------------------------------------")
-    #print(distList)
+    # Evaluating distance across frameAnsCombList into frameAnsScoreList
+    frameAnsScoreList = []
+    for i in range(len(frameAnsCombList)):
+        groundTruth = frameAnsCombList[i][0][0]
+        minScore = float("inf")
+        for dataValue in frameAnsCombList[i]:
+            lvDist = distance(groundTruth, dataValue[1])
+            if lvDist < minScore:
+                minScore = lvDist
+        # frameAnsScoreList format : ["groundTruth", minScore]
+        frameAnsScoreList.append([groundTruth, minScore])
 
-    # Applying selection sort (least to greatest) to distList
-    keyInd = 0
-    minI = 0
-    for key in distList:
-        for i in range(len(distList[keyInd])):
-            # Find the minimum element in remaining
-            minI = i
-            for j in range(i+1, len(distList[keyInd])):
-                if distList[keyInd][minI] > distList[keyInd][j]:
-                    minI = j
-            # Swap the found minimum element with minI       
-            distList[keyInd][i], distList[keyInd][minI] = distList[keyInd][minI],\
-                distList[keyInd][i] 
-        keyInd += 1
-    #print(distList)
+    finalScore = finalScoreCalculator(frameAnsScoreList)
+    return finalScore
 
-    # Creating a related array to distList with the number of words per key in realADict
-    totalWord = []
-    for key in realADict:
-        totalWordInKey = []
-        '''
-        for val in realADict:
-            print(key)
-            print(realADict[key])
-            totalWordInKey.append(len(realADict[key]))
-        totalWord.append(sum(totalWordInKey))
-        '''
-        totalWord.append(len(realADict[key]))
-    #print(totalWord)
 
-    # Calculating total Levenshtein Distance per key in distListSumOfKey list 
-    distListSumOfKey = []
-    keyInd = 0
-    for key in distList:
-        #print(distList[keyInd][0:totalWord[keyInd]])
-        distListSumOfKey.append(sum(distList[keyInd][0:totalWord[keyInd]]))
-        keyInd += 1
-    #print(distListSumOfKey)
-    #print(frameAnsCombList[0][0])
-    #print([[real, gen] for real in frameAnsCombList[0][0][0] for gen in frameAnsCombList[0][0][1]])
+# Calculates final score from a score list
+def finalScoreCalculator(scoreList):
+    finalScore = 0.0
+    for item in scoreList:
+        wordLength = len(item[0])
+        currScore = item[1]
+        # Basing score on ratio between LD Score and word length
+        finalScore += float(currScore / wordLength)
+    return float(finalScore / len(scoreList))
 
-    # Calculating and Returning average distance
-    if (len(distListSumOfKey) != 0):
-        avgDistDouble = sum(distListSumOfKey)/len(distListSumOfKey)
-    
-    return avgDistDouble
 
 #Import LDCalc and run distanceCalc("ground_truth.txt", "competitor_generated.txt")
 avgDist = distanceCalc("realA.txt", "A.txt")
