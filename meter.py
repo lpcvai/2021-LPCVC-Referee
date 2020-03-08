@@ -4,6 +4,7 @@ from pyscreeze import ImageNotFoundException
 from pyautogui import Point, click, moveTo, mouseDown, mouseUp, typewrite, locateOnScreen
 from subprocess import Popen
 import time
+import os
 
 MEASURE_MENU = Point(x=122, y=418)
 REPORT_MENU = Point(x=117, y=538)
@@ -11,7 +12,8 @@ START_STOP = Point(x=433, y=262)
 SAVE_CSV = Point(x=553, y=564)
 SAVE_BTN = Point(x=1317, y=743)
 
-BASE_COMMAND = 'python3 ~/code.py'
+BASE_COMMAND = 'cd ~/Documents/run_sub/ && python3 sub.py ~/Documents/test_data/video.MP4 ~/Documents/test_data/questions.txt'
+FILENAME = "C:\\lpcvc\\pimetrics.csv"
 
 def waitForImg(img, region, breakEarly=lambda:False):
 	"""
@@ -42,7 +44,7 @@ def startMeter():
 	#startUserCode()
 	#waitForImg("start.png", region=(651, 772, 909-651, 806-772))
 
-def stopMeter(filename="pimetrics.csv"):
+def stopMeter(filename=FILENAME):
 	"""
 	Use hotkeys to save the power meter data to a file.
 	"""
@@ -80,12 +82,25 @@ def cycle(command=BASE_COMMAND):
 	#cmdText = ' '.join(['ssh', '-t', 'pi@referee.local', f'{BASE_COMMAND}"'])
 	#cmd('pkill', '-f', f"'{cmdText}'")
 
-def main():
-	#while True:
-	#	if (input("Start? [y] ") != 'y'):
-	#		break
-	cycle()
+startCycle = True
 
-if __name__ == "__main__":
-	main()
+from flask import Flask, send_file
 
+app = Flask(__name__)
+
+@app.route("/")
+def haobo():
+	global startCycle
+	try:
+		os.remove(FILENAME)
+	except:
+		pass
+	if startCycle:
+		startCycle = False
+		cycle()
+		startCycle = True
+		try:
+			return send_file(FILENAME)
+		except:
+			return ""
+	return "Task Already Running"
