@@ -123,5 +123,7 @@ def finalScoreCalculator(scoreList):
 
 
 #Import LDCalc and run distanceCalc("ground_truth.txt", "competitor_generated.txt")
-avgDist = distanceCalc("realA.txt", "A.txt")
-print("The error of the solution is: %f" %(avgDist))
+if __name__ == '__main__':
+    avgDist = distanceCalc("realA.txt", "A.txt")
+    print("The error of the solution is: %f" %(avgDist))
+
