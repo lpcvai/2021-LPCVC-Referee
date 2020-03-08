@@ -67,6 +67,7 @@ def cycle(command=BASE_COMMAND):
 
 	startMeter()
 	#waitForImg("7s.png", region=(1117, 643, 1208-1117, 694-643))
+	waitForImg("1s.png", region=(1117, 643, 1208-1117, 694-643))
 	waitForImg("start.png", region=(326, 234, 216, 59), breakEarly=breakEarly)
 
 	# Click the stop button if needed
@@ -77,6 +78,7 @@ def cycle(command=BASE_COMMAND):
 	#time.sleep(10)
 	#proc.kill()
 	stopMeter()
+	os.system(r"powershell (Add-Type '[DllImport(\"user32.dll\")]^public static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);' -Name a -Pas)::SendMessage(-1,0x0112,0xF170,2)")
 
 #def stopPi():
 	#cmdText = ' '.join(['ssh', '-t', 'pi@referee.local', f'{BASE_COMMAND}"'])
