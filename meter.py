@@ -34,13 +34,13 @@ def waitForImg(img, region, breakEarly=lambda:False):
 			time.sleep(.01)
 	return True
 
-def startMeter():
+def startMeter(breakEarly=lambda:False):
 	"""
 	Use hotkeys to start the power meter.
 	"""
 	click(MEASURE_MENU)
 	click(START_STOP)
-	waitForImg("stop.png", region=(326, 234, 216, 59))
+	waitForImg("stop.png", region=(326, 234, 216, 59), breakEarly=breakEarly)
 	#startUserCode()
 	#waitForImg("start.png", region=(651, 772, 909-651, 806-772))
 
@@ -65,9 +65,8 @@ def cycle(command=BASE_COMMAND):
 	def breakEarly():
 		return proc.poll() is not None
 
-	startMeter()
+	startMeter(breakEarly)
 	#waitForImg("7s.png", region=(1117, 643, 1208-1117, 694-643))
-	waitForImg("1s.png", region=(1117, 643, 1208-1117, 694-643))
 	waitForImg("start.png", region=(326, 234, 216, 59), breakEarly=breakEarly)
 
 	# Click the stop button if needed
@@ -78,7 +77,6 @@ def cycle(command=BASE_COMMAND):
 	#time.sleep(10)
 	#proc.kill()
 	stopMeter()
-	os.system(r"powershell (Add-Type '[DllImport(\"user32.dll\")]^public static extern int SendMessage(int hWnd, int hMsg, int wParam, int lParam);' -Name a -Pas)::SendMessage(-1,0x0112,0xF170,2)")
 
 #def stopPi():
 	#cmdText = ' '.join(['ssh', '-t', 'pi@referee.local', f'{BASE_COMMAND}"'])
