@@ -2,6 +2,7 @@
 from Levenshtein import distance
 from collections import OrderedDict
 import itertools
+import sys
 
 
 # Method to read a text file: "txtName"
@@ -124,6 +125,9 @@ def finalScoreCalculator(scoreList):
 
 #Import LDCalc and run distanceCalc("ground_truth.txt", "competitor_generated.txt")
 if __name__ == '__main__':
-    avgDist = distanceCalc("realA.txt", "A.txt")
-    print("The error of the solution is: %f" %(avgDist))
+    if len(sys.argv) == 3:
+        avgDist = distanceCalc(sys.argv[1], sys.argv[2])
+        print("The error of the solution is: %f" %(avgDist))
+    else:
+        print("Incorrect number of arguments. Found {:d}, expected 3".format(len(sys.argv)))
 
