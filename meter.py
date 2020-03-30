@@ -12,7 +12,7 @@ START_STOP = Point(x=433, y=262)
 SAVE_CSV = Point(x=553, y=564)
 SAVE_BTN = Point(x=1317, y=743)
 
-BASE_COMMAND = 'cd ~/Documents/run_sub/ && python3 sub.py ~/Documents/test_data/video.MP4 ~/Documents/test_data/questions.txt'
+BASE_COMMAND = 'cd ~/Documents/run_sub/ && ./test_sub'
 FILENAME = "C:\\lpcvc\\pimetrics.csv"
 
 def waitForImg(img, region, breakEarly=lambda:False):
