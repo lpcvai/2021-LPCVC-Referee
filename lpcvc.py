@@ -6,7 +6,7 @@ import requests
 import LDCalc
 
 SITE = os.path.expanduser('~/sites/lpcv.ai')
-usr_sub = "recognize_video.py"
+usr_sub = "test.pyz"
 
 def findScore(name):
     avgDist = LDCalc.distanceCalc("test_data/%s/realA.txt" % (name,), SITE + "/results/usr_result.txt")
@@ -26,7 +26,11 @@ def testSubmission(name):
     os.system('ssh pi@referee.local "chmod +x ~/Documents/run_sub/test_sub"')
 
     #send user submission from ~/sites/lpcv.ai/submissions/ to r_pi
-    os.system("scp " + SITE + "/submissions/2020CVPR/20lpcvc_video/" + usr_sub + " pi@referee.local:~/Documents/run_sub/sub.py")
+    os.system("scp " + SITE + "/submissions/2020CVPR/20lpcvc_video/" + usr_sub + " pi@referee.local:~/Documents/run_sub/sub.pyz")
+    os.system('ssh pi@referee.local "unzip ~/Documents/run_sub/sub.pyz -d ~/Documents/run_sub/sub"')
+
+    #pip install requirements
+    os.system('ssh pi@referee.local "~/20cvpr/myenv/bin/python3 -m pip install -r ~/Documents/run_sub/sub/requirements.txt"')
 
     #copy test video and question to r_pi
     os.system("scp -r test_data/%s/pi pi@referee.local:~/Documents/run_sub/test_data" % (name,))
