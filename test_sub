@@ -1,0 +1,2 @@
+#! /usr/bin/env bash
+python3 sub.py ~/Documents/test_data/video.MP4 ~/Documents/test_data/questions.txt
