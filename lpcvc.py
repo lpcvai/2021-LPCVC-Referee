@@ -15,6 +15,19 @@ def findScore(name):
     fpOut.write("The error of the solution is: %f" %(avgDist))
     fpOut.close()
 
+
+def getVersion(file):
+    """
+    Detect the version of Python used for a submission.
+    """
+    with open(file, 'rb') as pyz:
+        if pyz.read(2) == b'#!':
+            version = pyz.readline().rsplit(b'python', 2)[1].strip()
+            if version in (b'3.7',):
+                return version.decode()
+        return '3.7'
+
+
 def testSubmission(name):
     """
     User submissions are queued then move to '~/sites/lpcv.ai/submissions/' one at a time
@@ -26,11 +39,11 @@ def testSubmission(name):
     os.system('ssh pi@referee.local "chmod +x ~/Documents/run_sub/test_sub"')
 
     #send user submission from ~/sites/lpcv.ai/submissions/ to r_pi
-    os.system("scp " + SITE + "/submissions/2020CVPR/20lpcvc_video/" + usr_sub + " pi@referee.local:~/Documents/run_sub/sub.pyz")
-    os.system('ssh pi@referee.local "unzip ~/Documents/run_sub/sub.pyz -d ~/Documents/run_sub/sub"')
+    os.system("scp " + SITE + "/submissions/2020CVPR/20lpcvc_video/" + usr_sub + " pi@referee.local:~/Documents/run_sub/solution.pyz")
+    os.system('ssh pi@referee.local "unzip ~/Documents/run_sub/solution.pyz -d ~/Documents/run_sub/solution"')
 
     #pip install requirements
-    os.system('ssh pi@referee.local "~/20cvpr/myenv/bin/python3 -m pip install -r ~/Documents/run_sub/sub/requirements.txt"')
+    os.system('ssh pi@referee.local "cd ~/Documents/run_sub; . ~/20cvpr/myenv/bin/activate; pip3 install -r solution/requirements.txt"')
 
     #copy test video and question to r_pi
     os.system("scp -r test_data/%s/pi pi@referee.local:~/Documents/run_sub/test_data" % (name,))
@@ -55,4 +68,5 @@ def testSubmission(name):
 
 
 if __name__ == "__main__":
-    testSubmission("video1")
+    testSubmission("flex1")
+
