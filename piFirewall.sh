@@ -14,5 +14,5 @@ then
   sudo iptables -P INPUT ACCEPT
   sudo iptables -P OUTPUT ACCEPT
 else
-  echo "Please enter block to disable all connections except for meter and server or 'block' to allow all connections"
+  echo "Please enter 'block' to disable all connections except for meter and server or 'allow' to allow all connections"
 fi
