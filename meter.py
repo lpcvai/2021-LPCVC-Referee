@@ -52,7 +52,7 @@ def stopMeter(filename=FILENAME):
 	click(REPORT_MENU)
 	click(SAVE_CSV)
 	time.sleep(1.5)
-	typewrite(filename)
+	typewrite(filename + '\n')
 	click(SAVE_BTN)
 	time.sleep(1.5)
 
@@ -60,6 +60,7 @@ def cycle(command=BASE_COMMAND):
 	"""
 	Start the command specified and wait until the meter times out or the process terminates early.
 	"""
+	now = time.time()
 	proc = Popen(['C:\\Windows\\System32\\bash.exe', '-c', 'ssh -t pi@referee.local "' + command + '"'])
 
 	def breakEarly():
@@ -72,11 +73,15 @@ def cycle(command=BASE_COMMAND):
 	# Click the stop button if needed
 	if breakEarly():
 		click(START_STOP)
+		error = "" if proc.poll() == 0 else "RTE"
 	else:
 		proc.terminate()
+		error = "TLE" #152 # TLE => SIGXCPU
+	td = time.time() - now
 	#time.sleep(10)
 	#proc.kill()
 	stopMeter()
+	return error, td
 
 #def stopPi():
 	#cmdText = ' '.join(['ssh', '-t', 'pi@referee.local', f'{BASE_COMMAND}"'])
@@ -97,10 +102,13 @@ def haobo():
 		pass
 	if startCycle:
 		startCycle = False
-		cycle()
+		error, td = cycle()
 		startCycle = True
 		try:
-			return send_file(FILENAME)
+			response = send_file(FILENAME)
+			response.headers['Program-Termination-Reason'] = error
+			response.headers['Program-Runtime'] = td
+			return response
 		except:
 			return ""
-	return "Task Already Running"
+	return ("Task Already Running", 500)

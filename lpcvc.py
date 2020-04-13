@@ -35,14 +35,6 @@ def checkIfProcessRunning(processName):
     return False
 
 
-def findScore(name):
-    avgDist = LDCalc.distanceCalc("test_data/%s/realA.txt" % (name,), SITE + "/results/answers.txt")
-
-    fpOut = open(SITE + "/results/usr_LDist.txt", 'w')
-    fpOut.write("The error of the solution is: %f" %(avgDist))
-    fpOut.close()
-
-
 def getVersion(file):
     """
     Detect the version of Python used for a submission.
@@ -73,9 +65,11 @@ def testSubmission(submission, video):
 
     #step 2: start meter.py on laptop, download pi_metrics.csv through http
     #account for pcms crashing
-    with open(SITE + "/results/power.txt", "w") as power:
+    with open(SITE + "/results/power.csv", "w") as power:
         s = requests.Session()
         r = s.get("http://meter.local/")
+        error = r.headers['Program-Termination-Reason']
+        runtime = float(r.headers['Program-Runtime'])
         power.write(r.text)
 
 
@@ -83,9 +77,7 @@ def testSubmission(submission, video):
     # name of output file? Currently any .txt file
     os.system("scp pi@referee.local:~/Documents/run_sub/*.txt " + SITE + "/results")
 
-    #step 5: run LDCalc
-    #findScore(name) # old. now done in scoring.py
-
+    return error, runtime
 
 class GracefulKiller:
     #https://stackoverflow.com/a/31464349
@@ -121,11 +113,11 @@ def startQueue(queuePath, sleepTime):
             submission = queue.pop()
             with open(submission, 'w') as scoreCSVFile:
                 scoreCSV = csv.writer(scoreCSVFile)
-                scoreCSV.writerow(["video_name", "accuracy", "energy", "perfomance_score"])
+                scoreCSV.writerow(["video_name", "accuracy", "energy", "error_status", "run_time", "perfomance_score"])
                 subfile = str(submission).split('/')[-1]
                 for video, videoLength in videos:
-                    testSubmission(subfile, video)
-                    crunchScore(video, subfile, scoreCSV, videoLength)
+                    error, runtime = testSubmission(subfile, video)
+                    crunchScore(video, subfile, scoreCSV, videoLength, error, runtime)
                     if killer.kill_now:
                         exit()
                 reportScore(subfile, scoreCSV)
@@ -137,12 +129,12 @@ def startQueue(queuePath, sleepTime):
     exit()
 
 
-def crunchScore(video, submission, scoreCSV, videoLength):
+def crunchScore(video, submission, scoreCSV, videoLength, error, runtime):
     """
-    TODO: Process power.csv and dist.txt to get (video_name, accuracy, energy, score)
+    Process power.csv and dist.txt to get (video_name, accuracy, energy, score)
     """
     ldAccuracy, power, final_score_a, final_score_b = calc_final_score("test_data/%s/realA.txt" % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv", videoLength)
-    scoreCSV.writerow([video, ldAccuracy, power, final_score_a])
+    scoreCSV.writerow([video, ldAccuracy, power, error, runtime, final_score_a])
 
 
 def reportScore(submission, scoreCSV):
@@ -166,6 +158,8 @@ if __name__ == "__main__":
                "script is primarily used as a library for that script and for testing.")
     subs = parser.add_subparsers()
 
+    def_parser = subs.add_parser('', help='default option for compatibility; tests the test.pyz submission on flex1')
+
     r_parser = subs.add_parser('r', help='start the queue')
     r_parser.set_defaults(func=startQueue, queuePath=queuePath, sleepTime=120)
 
@@ -184,8 +178,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if not hasattr(args, 'func'):
-        parser.print_help()
-        exit()
+        #parser.print_help()
+        #exit()
+        args.func=testSubmission
+        args.submission='test.pyz'
+        args.video='flex1'
 
     if args.func is not grade and checkIfProcessRunning(sys.argv[0].split('/')[-1]):
         print("A queue process is already running. Please wait for it to finish.")
@@ -193,4 +190,6 @@ if __name__ == "__main__":
 
     func = args.func
     del args.func
-    func(**vars(args))
+    output = func(**vars(args))
+    if output is not None:
+        print("Operation returned " + str(output))
