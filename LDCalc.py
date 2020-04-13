@@ -119,15 +119,18 @@ def finalScoreCalculator(scoreList):
         wordLength = len(item[0])
         currScore = item[1]
         # Basing score on ratio between LD Score and word length
-        finalScore += float(currScore / wordLength)
+        currFinal = float(currScore / wordLength)
+        if currFinal > 1:
+            currFinal = 1
+        finalScore += currFinal
     return float(finalScore / len(scoreList))
 
 
 #Import LDCalc and run distanceCalc("ground_truth.txt", "competitor_generated.txt")
-if __name__ == '__main__':
-    if len(sys.argv) == 3:
-        avgDist = distanceCalc(sys.argv[1], sys.argv[2])
-        print("The error of the solution is: %f" %(avgDist))
-    else:
-        print("Incorrect number of arguments. Found {:d}, expected 3".format(len(sys.argv)))
+# if __name__ == '__main__':
+#     if len(sys.argv) == 3:
+#         avgDist = distanceCalc(sys.argv[1], sys.argv[2])
+#         print("%f" %(1 - avgDist))
+#     else:
+#         print("Incorrect number of arguments. Found {:d}, expected 3".format(len(sys.argv)))
 
