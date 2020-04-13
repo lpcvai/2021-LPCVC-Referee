@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import psutil
 import requests
+from scoring import calc_final_score
 import signal
 import subprocess
 import sys
@@ -72,7 +73,7 @@ def testSubmission(submission, video):
 
     #step 2: start meter.py on laptop, download pi_metrics.csv through http
     #account for pcms crashing
-    with open(SITE + "/results/power.csv", "w") as power:
+    with open(SITE + "/results/power.txt", "w") as power:
         s = requests.Session()
         r = s.get("http://meter.local/")
         power.write(r.text)
@@ -83,7 +84,7 @@ def testSubmission(submission, video):
     os.system("scp pi@referee.local:~/Documents/run_sub/*.txt " + SITE + "/results")
 
     #step 5: run LDCalc
-    findScore(name)
+    #findScore(name) # old. now done in scoring.py
 
 
 class GracefulKiller:
@@ -108,7 +109,7 @@ def startQueue(queuePath, sleepTime):
         os.mkdir(queuePath)
     except FileExistsError:
         pass
-    videos = ['flex1']
+    videos = [('flex1', 300)]
 
     # Create a signal handler to finish as soon as possible
     killer = GracefulKiller()
@@ -122,9 +123,9 @@ def startQueue(queuePath, sleepTime):
                 scoreCSV = csv.writer(scoreCSVFile)
                 scoreCSV.writerow(["video_name", "accuracy", "energy", "perfomance_score"])
                 subfile = str(submission).split('/')[-1]
-                for video in videos:
+                for video, videoLength in videos:
                     testSubmission(subfile, video)
-                    crunchScore(video, subfile, scoreCSV)
+                    crunchScore(video, subfile, scoreCSV, videoLength)
                     if killer.kill_now:
                         exit()
                 reportScore(subfile, scoreCSV)
@@ -136,11 +137,12 @@ def startQueue(queuePath, sleepTime):
     exit()
 
 
-def crunchScore(video, submission, scoreCSV):
+def crunchScore(video, submission, scoreCSV, videoLength):
     """
     TODO: Process power.csv and dist.txt to get (video_name, accuracy, energy, score)
     """
-    scoreCSV.writerow([video, 0, 0, 0])
+    ldAccuracy, power, final_score_a, final_score_b = calc_final_score("test_data/%s/realA.txt" % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv", videoLength)
+    scoreCSV.writerow([video, ldAccuracy, power, final_score_a])
 
 
 def reportScore(submission, scoreCSV):
