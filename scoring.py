@@ -1,6 +1,7 @@
 import sys
 from LDCalc import distanceCalc
 
+MAX_POWER = 6.28232727
 
 def parsePowerFile(powerFile):
     with open(powerFile, "r") as f:
@@ -13,14 +14,16 @@ def parsePowerFile(powerFile):
         return power
     return -1
 
-def calc_final_score(groundTruthFile, submissionFile, powerFile):
+def calc_final_score(groundTruthFile, submissionFile, powerFile, videoLength):
     if powerFile == None:
         return 0
+    videoLengthHours = videoLength / 360.0
     ldError = distanceCalc(groundTruthFile, submissionFile)
     ldAccuracy = 1 - ldError
     power = parsePowerFile(powerFile)
-    final_score = ldAccuracy / (1 + power)
-    return (ldAccuracy, power, final_score)
+    final_score_a = ldAccuracy * (1 - (power / (3 * MAX_POWER * videoLengthHours)))
+    final_score_b = ldAccuracy / (1 + power)
+    return (ldAccuracy, power, final_score_a, final_score_b)
 
 
 
