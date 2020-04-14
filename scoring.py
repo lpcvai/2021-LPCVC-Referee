@@ -27,11 +27,10 @@ def calc_final_score(groundTruthFile, submissionFile, powerFile, videoLength):
 
 
 
-# if __name__ == '__main__':
-#     watt_hours = parsePowerFile("power_csv.csv")
-#     print(watt_hours)
-#     if len(sys.argv) == 3:
-#         avgDist = distanceCalc(sys.argv[1], sys.argv[2])
-#         print("%f" %(1 - avgDist))
-#     else:
-#         print("Incorrect number of arguments. Found {:d}, expected 3".format(len(sys.argv)))
+if __name__ == '__main__':
+     if len(sys.argv) == 5:
+         final_tuple = calc_final_score(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+         print(final_tuple)
+     else:
+         print("Incorrect number of arguments. Found {:d}, expected 5".format(len(sys.argv)))
+		 print("Usage: python3 scoring.py [ground truth file] [submission file] [power csv file] [video length in seconds]
