@@ -92,6 +92,10 @@ def distanceCalc(realATxtName, aTxtName):
         allAnswers = flatten(aDict[key])
         for realAnswer in allRealAnswers:
             currFrame = []
+            if allAnswers == []:
+                currFrame.append([realAnswer, ""])
+                frameAnsCombList.append(currFrame)
+                continue
             for answer in allAnswers:
                 currFrame.append([realAnswer, answer])
             frameAnsCombList.append(currFrame)
