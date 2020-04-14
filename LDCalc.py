@@ -11,6 +11,7 @@ def reader(txtName):
         dict = OrderedDict()
         # Reading all lines in A.txt into keysAndVals
         keysAndValsOG = txt.readlines()
+        keysAndValsOG = [x.lower() for x in keysAndValsOG]
         i = 0
         key = []  # Seperate array to store keys
         val = []  # Seperate array to store values
