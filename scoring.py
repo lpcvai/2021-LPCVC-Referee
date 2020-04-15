@@ -21,16 +21,16 @@ def calc_final_score(groundTruthFile, submissionFile, powerFile, videoLength):
     ldError = distanceCalc(groundTruthFile, submissionFile)
     ldAccuracy = 1 - ldError
     power = parsePowerFile(powerFile)
-    final_score_a = ldAccuracy * (1 - (power / (3 * MAX_POWER * videoLengthHours))) if power != -1 else 0
-    final_score_b = ldAccuracy / (1 + power)
-    return (ldAccuracy, power, final_score_a, final_score_b)
+    final_score_a = ldAccuracy / (1 + power) if power != -1 else 0
+    final_score_b = ldAccuracy * (1 - (power / (3 * MAX_POWER * videoLengthHours))) if power != -1 else 0
+    return (ldAccuracy, power, round(final_score_a,5), round(final_score_b,5))
 
 
 
 if __name__ == '__main__':
-     if len(sys.argv) == 5:
-         final_tuple = calc_final_score(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
-         print(final_tuple)
-     else:
-         print("Incorrect number of arguments. Found {:d}, expected 5".format(len(sys.argv)))
-		 print("Usage: python3 scoring.py [ground truth file] [submission file] [power csv file] [video length in seconds]
+    if len(sys.argv) == 5:
+        final_tuple = calc_final_score(sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4]))
+        print(final_tuple)
+    else:
+        print("Incorrect number of arguments. Found {:d}, expected 5".format(len(sys.argv)))
+        print("Usage: python3 scoring.py [ground truth file] [submission file] [power csv file] [video length in seconds]")
