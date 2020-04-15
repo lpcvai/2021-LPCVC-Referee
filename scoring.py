@@ -20,10 +20,10 @@ def calc_final_score(groundTruthFile, submissionFile, powerFile):
     #videoLengthHours = videoLength / 3600.0
     ldError = distanceCalc(groundTruthFile, submissionFile)
     ldAccuracy = 1 - ldError
-    power = parsePowerFile(powerFile)
-    final_score_a = ldAccuracy / (power) if power != -1 else 0
+    energy = parsePowerFile(powerFile)
+    final_score_a = ldAccuracy / (energy) if energy != -1 else 0
     #final_score_b = ldAccuracy * (1 - (power / (3 * MAX_POWER * videoLengthHours))) if power != -1 else 0
-    return (ldAccuracy, power, round(final_score_a,5))
+    return (ldAccuracy, energy, round(final_score_a,5))
 
 
 
