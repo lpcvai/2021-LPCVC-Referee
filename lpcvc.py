@@ -2,7 +2,6 @@
 
 import argparse
 import csv
-import LDCalc
 import os
 from pathlib import Path
 import psutil
@@ -58,7 +57,7 @@ def testSubmission(submission, video):
     os.system('ssh pi@referee.local "unzip ~/Documents/run_sub/solution.pyz -d ~/Documents/run_sub/solution"')
 
     #pip install requirements
-    os.system('ssh pi@referee.local "cd ~/Documents/run_sub; . ~/20cvpr/myenv/bin/activate; pip3 install -r solution/requirements.txt"')
+    os.system('ssh pi@referee.local "cd ~/Documents/run_sub; . ~/20cvpr/myenv/bin/activate.fish; pip3 install -r solution/requirements.txt"')
 
     #copy test video and question to r_pi
     os.system("scp -r test_data/%s/pi pi@referee.local:~/Documents/run_sub/test_data" % (video,))
@@ -108,7 +107,7 @@ def startQueue(queuePath, sleepTime):
     while not killer.kill_now:
         killer.shutdown_withold = True
 
-        queue = sorted(Path(queuePath).iterdir(), key=os.path.getctime, reverse=True) #build queue
+        queue = sorted(map(str, Path(queuePath).iterdir()), key=os.path.getctime, reverse=True) #build queue
         while queue:
             submission = queue.pop()
             with open(submission, 'w') as scoreCSVFile:
@@ -121,7 +120,7 @@ def startQueue(queuePath, sleepTime):
                     if killer.kill_now:
                         exit()
                 reportScore(subfile, scoreCSV)
-                os.rename(submission, "/submissions/2020CVPR/20lpcvc_video/" + subfile + ".csv")
+                os.rename(submission, SITE + "/submissions/2020CVPR/20lpcvc_video/" + subfile + ".csv")
 
         killer.shutdown_withold = False
         time.sleep(120)
@@ -133,7 +132,7 @@ def crunchScore(video, submission, scoreCSV, videoLength, error, runtime):
     """
     Process power.csv and dist.txt to get (video_name, accuracy, energy, score)
     """
-    ldAccuracy, power, final_score_a, final_score_b = calc_final_score("test_data/%s/realA.txt" % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv", videoLength)
+    ldAccuracy, power, final_score_a = calc_final_score("test_data/%s/realA.txt" % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv")
     scoreCSV.writerow([video, ldAccuracy, power, error, runtime, final_score_a])
 
 
@@ -141,24 +140,37 @@ def reportScore(submission, scoreCSV):
     """
     TODO: Tell the server to store the average result into the database
     """
-    print(submission)
+    print(submission + " has been scored!")
+
+
+def testAndGrade(submission, video):
+    error, run_time = testSubmission(submission, video)
+    ldAccuracy, power, final_score_a, final_score_b = calc_final_score("test_data/%s/realA.txt" % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv")
+    return ldAccuracy, power, error, run_time, final_score_a
 
 
 if __name__ == "__main__":
     import argparse
+    from LDCalc import distanceCalc
+
+    class SiteBasedPath(str):
+        def build(self, SITE):
+            return os.path.join(str(SITE), self)
 
     queuePath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'queue')
-
-    def grade(realATxtName, aTxtName):
-        print(LDCalc.distanceCalc(realATxtName, aTxtName))
 
     parser = argparse.ArgumentParser(description='LPCVC UAV Track Submission Queue and Grader',
         epilog="The suggested way to start the queue is by using the /etc/init.d script. "
                "Please use that instead to start and stop the queue in production. This "
                "script is primarily used as a library for that script and for testing.")
+    parser.add_argument('--site', help="folder location of the lpcv.ai website", nargs='?')
     subs = parser.add_subparsers()
 
-    def_parser = subs.add_parser('', help='default option for compatibility; tests the test.pyz submission on flex1')
+    tG_parser = subs.add_parser('', help='default option for compatibility; test and grade a single submission')
+    tG_parser.set_defaults(func=testAndGrade, submission='test.pyz', video='flex1')
+    tG_parser.add_argument('submission', help="file name of the submission", nargs='?')
+    tG_parser.add_argument('video', help="name of the video to test on", nargs='?')
+    args = parser.parse_args()
 
     r_parser = subs.add_parser('r', help='start the queue')
     r_parser.set_defaults(func=startQueue, queuePath=queuePath, sleepTime=120)
@@ -172,24 +184,31 @@ if __name__ == "__main__":
     t_parser.add_argument('video', help="name of the video to test on", nargs='?')
 
     g_parser = subs.add_parser('g', help='grade an answers.txt file')
-    g_parser.set_defaults(func=grade)
+    g_parser.set_defaults(func=distanceCalc, aTxtName=SiteBasedPath("results/answers.csv"))
     g_parser.add_argument('realATxtName', help="path of the real answers.txt file")
-    g_parser.add_argument('aTxtName', help="path of the submitted answers.txt file")
-    args = parser.parse_args()
+    g_parser.add_argument('aTxtName', help="path of the submitted answers.txt file", nargs='?')
 
-    if not hasattr(args, 'func'):
+    G_parser = subs.add_parser('G', help='grade using all files')
+    G_parser.set_defaults(func=calc_final_score, submissionFile=SiteBasedPath("results/answers.txt"), powerFile=SiteBasedPath("results/power.csv"), videoLength=300)
+    G_parser.add_argument('groundTruthFile', help="path of the real answers.txt file")
+    G_parser.add_argument('submissionFile', help="path of the submitted answers.txt file", nargs='?')
+    G_parser.add_argument('powerFile', help="path of the power.csv file", nargs='?')
+    G_parser.add_argument('videoLength', help="length of the video in seconds (default 300)", nargs='?', type=int)
+
+    if hasattr(args, 'site') and args.site is not None:
+        SITE = args.site
+    del args.site
+
+    #if not hasattr(args, 'func'):
         #parser.print_help()
         #exit()
-        args.func=testSubmission
-        args.submission='test.pyz'
-        args.video='flex1'
 
-    if args.func is not grade and checkIfProcessRunning(sys.argv[0].split('/')[-1]):
+    if args.func in (startQueue, testSubmission) and checkIfProcessRunning(sys.argv[0].split('/')[-1]):
         print("A queue process is already running. Please wait for it to finish.")
         exit(1)
 
     func = args.func
     del args.func
-    output = func(**vars(args))
+    output = func(**{k: v.build(SITE) if isinstance(v, SiteBasedPath) else v for k, v in vars(args).items()})
     if output is not None:
         print("Operation returned " + str(output))
