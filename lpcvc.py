@@ -48,22 +48,27 @@ def getVersion(file):
 
 def testSubmission(submission, video):
     #clear files in ~/Documents/run_sub
+    print('\u001b[1m\u001b[4mCopying submission to Pi\u001b[0m')
     os.system('ssh pi@referee.local "rm -r ~/Documents/run_sub/*"')
     os.system('scp ./test_sub pi@referee.local:~/Documents/run_sub/test_sub')
     os.system('ssh pi@referee.local "chmod +x ~/Documents/run_sub/test_sub"')
 
     #send user submission from ~/sites/lpcv.ai/submissions/ to r_pi
     os.system("scp " + SITE + "/submissions/2020CVPR/20lpcvc_video/" + submission + " pi@referee.local:~/Documents/run_sub/solution.pyz")
+    print('\u001b[1m\u001b[4mExtracting submission on Pi\u001b[0m')
     os.system('ssh pi@referee.local "unzip ~/Documents/run_sub/solution.pyz -d ~/Documents/run_sub/solution"')
 
     #pip install requirements
+    print('\u001b[1m\u001b[4mPIP installing requirements\u001b[0m')
     os.system('ssh pi@referee.local "cd ~/Documents/run_sub; . ~/20cvpr/myenv/bin/activate.fish; pip3 install -r solution/requirements.txt"')
 
     #copy test video and question to r_pi
+    print('\u001b[1m\u001b[4mCopying test footage and questions to Pi\u001b[0m')
     os.system("scp -r test_data/%s/pi pi@referee.local:~/Documents/run_sub/test_data" % (video,))
 
     #step 2: start meter.py on laptop, download pi_metrics.csv through http
     #account for pcms crashing
+    print('\u001b[1m\u001b[4mRunning submission\u001b[0m')
     with open(SITE + "/results/power.csv", "w") as power:
         s = requests.Session()
         r = s.get("http://meter.local/")
@@ -74,6 +79,7 @@ def testSubmission(submission, video):
 
     #step 4: copy answer_txt from pi
     # name of output file? Currently any .txt file
+    print('\u001b[1m\u001b[4mScoring answers\u001b[0m')
     os.system("scp pi@referee.local:~/Documents/run_sub/*.txt " + SITE + "/results")
 
     return error, runtime
@@ -170,7 +176,6 @@ if __name__ == "__main__":
     tG_parser.set_defaults(func=testAndGrade, submission='test.pyz', video='flex1')
     tG_parser.add_argument('submission', help="file name of the submission", nargs='?')
     tG_parser.add_argument('video', help="name of the video to test on", nargs='?')
-    args = parser.parse_args()
 
     r_parser = subs.add_parser('r', help='start the queue')
     r_parser.set_defaults(func=startQueue, queuePath=queuePath, sleepTime=120)
@@ -194,6 +199,7 @@ if __name__ == "__main__":
     G_parser.add_argument('submissionFile', help="path of the submitted answers.txt file", nargs='?')
     G_parser.add_argument('powerFile', help="path of the power.csv file", nargs='?')
     G_parser.add_argument('videoLength', help="length of the video in seconds (default 300)", nargs='?', type=int)
+    args = parser.parse_args()
 
     if hasattr(args, 'site') and args.site is not None:
         SITE = args.site
