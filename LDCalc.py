@@ -58,10 +58,12 @@ def reader(txtName):
         dict.update({keyNow: value})
     return dict
 
+
 def flatten(data):
     """Returns a flattened dictionary"""
     merged = list(itertools.chain(*data))
     return merged
+
 
 # Method to calculate the distance between the values between two dictionaries
 def distanceCalc(realATxtName, aTxtName):
@@ -81,7 +83,7 @@ def distanceCalc(realATxtName, aTxtName):
         for realAnswer in allRealAnswers:
             currFrame = []
             if allAnswers == []:
-                # Check to account for case in which submission does not 
+                # Check to account for case in which submission does not
                 # generate an answer for a given question
                 currFrame.append([realAnswer, ""])
                 frameAnsCombList.append(currFrame)
@@ -93,13 +95,13 @@ def distanceCalc(realATxtName, aTxtName):
     # Evaluating distance across frameAnsCombList into frameAnsScoreList
     frameAnsScoreList = []
     for i in range(len(frameAnsCombList)):
-        # This loop evaluates the distance across the ground truth and the 
+        # This loop evaluates the distance across the ground truth and the
         # submission. This loop generates a list of lists of the format
         # [["groundTruth", score], .....]
         groundTruth = frameAnsCombList[i][0][0]
         minScore = float("inf")
         for dataValue in frameAnsCombList[i]:
-            # This loop generates the best Levenshtein distance for a given 
+            # This loop generates the best Levenshtein distance for a given
             # answer
             lvDist = distance(groundTruth, dataValue[1])
             if lvDist < minScore:
@@ -109,10 +111,11 @@ def distanceCalc(realATxtName, aTxtName):
     finalScore = finalScoreCalculator(frameAnsScoreList)
     return finalScore
 
+
 def finalScoreCalculator(scoreList):
     """Returns final Levenshtein Word Score
 
-    Iterates through all the scores for the various queries. Final score is 
+    Iterates through all the scores for the various queries. Final score is
     calculated by averaging the ratio of the score with the word length of
     the ground truth. A given score is capped at 1.
     """
@@ -129,9 +132,9 @@ def finalScoreCalculator(scoreList):
 
 
 if __name__ == '__main__':
-     if len(sys.argv) == 3:
-         avgDist = distanceCalc(sys.argv[1], sys.argv[2])
-         print("%f" %(1 - avgDist))
-     else:
-         print("Incorrect number of arguments. Found {:d}, expected 3"\
-             .format(len(sys.argv)))
+    if len(sys.argv) == 3:
+        avgDist = distanceCalc(sys.argv[1], sys.argv[2])
+        print("%f" % (1 - avgDist))
+    else:
+        print("Incorrect number of arguments. Found {:d}, expected 3"
+              .format(len(sys.argv)))
