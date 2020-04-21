@@ -5,95 +5,84 @@ import itertools
 import sys
 
 
-# Method to read a text file: "txtName"
 def reader(txtName):
+    """Parse a submission file into a dictionary.
+
+    The dictionary that is generated in this function is analyzed in a seperate
+    function to determine the Levenshtein Word Score
+    """
     with open(txtName) as txt:
+        # Retrieve raw data from file
         dict = OrderedDict()
-        # Reading all lines in A.txt into keysAndVals
         keysAndValsOG = txt.readlines()
-        keysAndValsOG = [x.lower() for x in keysAndValsOG]
-        i = 0
-        key = []  # Seperate array to store keys
-        val = []  # Seperate array to store values
+    keysAndValsOG = [x.lower() for x in keysAndValsOG]
+    i = 0
+    key = []
+    val = []
+    ii = 0
+    semiPos = 0
+    keysAndVals = keysAndValsOG
 
-        ii = 0
-        semiPos = 0
-        keysAndVals = keysAndValsOG
+    while ii < len(keysAndValsOG[0]):
+        # Loop converts one line default answer format to seperate lines
+        if keysAndValsOG[0][ii] == ';':
+            semiPos = ii
+        elif keysAndValsOG[0][ii] == ':':
+            if (semiPos != 0):
+                keysAndVals[0] = keysAndValsOG[0][0:semiPos] + '|' \
+                    + keysAndValsOG[0][(semiPos+1):]
+        ii += 1
+    keysAndVals = keysAndValsOG[0].split("|")
 
-        # Converting one line default answer format to newlines
-        for value in keysAndValsOG[0]:
-            if keysAndValsOG[0][ii] == ';':
-                semiPos = ii
-            elif keysAndValsOG[0][ii] == ':':
-                if (semiPos != 0):
-                    keysAndVals[0] = keysAndValsOG[0][0:semiPos] + '|' + keysAndValsOG[0][(semiPos+1):]
-            ii += 1
-        keysAndVals = keysAndValsOG[0].split("|")
-
-        # Creating dictionary for reader
-        for value in keysAndVals:
-            keyVal1st = keysAndVals[i].split(":")
-            val1st = keyVal1st[1].split(";")
-            keyVal = []
-            keyVal.append(keyVal1st[0])
-            j = 0
-            for value in val1st:
-                keyVal.append(val1st[j])
-                j += 1
-            j = 0
-            key.append(keyVal[0].rsplit())
-            innerValList = []
-            j = 0
-            for value in keyVal:
-                if(j != 0):
-                    innerValList.append(keyVal[j].rsplit())
-                j += 1
-            val.append(innerValList)
-            i += 1
-        i = 0
-        i = 0
-        # TODO Remove test prints when done
-        # print(key)
-        # print(val)
-        # For every value in key update dictionary with next key and value
-        for value in key:
-            keyNow = str(key[i])
-            dict.update({keyNow: val[i]})
-            i += 1
-        # TODO Remove test print loop when done
-        '''
-        print("-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=")
-        for keys,values in dict.items():
-            print(keys)
-            print(dict[keys])
-        '''
+    while i < len(keysAndVals):
+        # This loop seperates keys and values into a dictionary containing
+        # the submission
+        keyVal1st = keysAndVals[i].split(":")
+        val1st = keyVal1st[1].split(";")
+        keyVal = []
+        keyVal.append(keyVal1st[0])
+        for value in val1st:
+            keyVal.append(value)
+        key.append(keyVal[0].rsplit())
+        innerValList = []
+        j = 0
+        for value in keyVal:
+            if(j != 0):
+                innerValList.append(value.rsplit())
+            j += 1
+        val.append(innerValList)
+        i += 1
+    for keyNow, value in zip(key, val):
+        # Update dictionary with final listing
+        keyNow = str(keyNow)
+        dict.update({keyNow: value})
     return dict
 
 def flatten(data):
+    """Returns a flattened dictionary"""
     merged = list(itertools.chain(*data))
     return merged
 
 # Method to calculate the distance between the values between two dictionaries
 def distanceCalc(realATxtName, aTxtName):
-    # Initializing variables and calling reader
+    """Returns a final Levenshtein Word Score"""
     realADict = reader(realATxtName)
     aDict = reader(aTxtName)
     for key in aDict.keys():
         if aDict[key] == [[]]:
             aDict[key] = [[""]]
-    distList = []
-    totAns = 0
-    avgDistDouble = None
 
-    # Creating combinations of different answers for each key
     frameAnsCombList = []
-    #print(realADict)
     for key in realADict:
+        # This loop creates the combinations of all the different answers
+        # for a given question
         allRealAnswers = flatten(realADict[key])
         allAnswers = flatten(aDict[key])
         for realAnswer in allRealAnswers:
             currFrame = []
             if allAnswers == []:
+                # Check to account for case in which submission does not 
+                # generate an answer for a given question
                 currFrame.append([realAnswer, ""])
                 frameAnsCombList.append(currFrame)
                 continue
@@ -104,28 +93,36 @@ def distanceCalc(realATxtName, aTxtName):
     # Evaluating distance across frameAnsCombList into frameAnsScoreList
     frameAnsScoreList = []
     for i in range(len(frameAnsCombList)):
+        # This loop evaluates the distance across the ground truth and the 
+        # submission. This loop generates a list of lists of the format
+        # [["groundTruth", score], .....]
         groundTruth = frameAnsCombList[i][0][0]
         minScore = float("inf")
         for dataValue in frameAnsCombList[i]:
+            # This loop generates the best Levenshtein distance for a given 
+            # answer
             lvDist = distance(groundTruth, dataValue[1])
             if lvDist < minScore:
                 minScore = lvDist
-        # frameAnsScoreList format : ["groundTruth", minScore]
         frameAnsScoreList.append([groundTruth, minScore])
 
     finalScore = finalScoreCalculator(frameAnsScoreList)
     return finalScore
 
-
-# Calculates final score from a score list
 def finalScoreCalculator(scoreList):
+    """Returns final Levenshtein Word Score
+
+    Iterates through all the scores for the various queries. Final score is 
+    calculated by averaging the ratio of the score with the word length of
+    the ground truth. A given score is capped at 1.
+    """
     finalScore = 0.0
     for item in scoreList:
         wordLength = len(item[0])
         currScore = item[1]
-        # Basing score on ratio between LD Score and word length
         currFinal = float(currScore / wordLength)
         if currFinal > 1:
+            # Cap error score at 1
             currFinal = 1
         finalScore += currFinal
     return float(finalScore / len(scoreList))
@@ -136,4 +133,5 @@ if __name__ == '__main__':
          avgDist = distanceCalc(sys.argv[1], sys.argv[2])
          print("%f" %(1 - avgDist))
      else:
-         print("Incorrect number of arguments. Found {:d}, expected 3".format(len(sys.argv)))
+         print("Incorrect number of arguments. Found {:d}, expected 3"\
+             .format(len(sys.argv)))
