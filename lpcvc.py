@@ -46,7 +46,7 @@ def getVersion(file):
         return '3.7'
 
 
-def testSubmission(submission, video):
+def setupSubmission(submission):
     #clear files in ~/Documents/run_sub
     print('\u001b[1m\u001b[4mCopying submission to Pi\u001b[0m')
     os.system('ssh pi@referee.local "rm -r ~/Documents/run_sub/*"')
@@ -62,6 +62,8 @@ def testSubmission(submission, video):
     print('\u001b[1m\u001b[4mPIP installing requirements\u001b[0m')
     os.system('ssh pi@referee.local "cd ~/Documents/run_sub; . ~/20cvpr/myenv/bin/activate.fish; pip3 install -r solution/requirements.txt"')
 
+
+def runOnVideo(video):
     #copy test video and question to r_pi
     print('\u001b[1m\u001b[4mCopying test footage and questions to Pi\u001b[0m')
     os.system("scp -r test_data/%s/pi pi@referee.local:~/Documents/run_sub/test_data" % (video,))
@@ -83,6 +85,12 @@ def testSubmission(submission, video):
     os.system("scp pi@referee.local:~/Documents/run_sub/*.txt " + SITE + "/results")
 
     return error, runtime
+
+
+def testSubmission(submission, video):
+    setupSubmission(submission)
+    return runOnVideo(video)
+
 
 class GracefulKiller:
     #https://stackoverflow.com/a/31464349
@@ -106,32 +114,33 @@ def startQueue(queuePath, sleepTime):
         os.mkdir(queuePath)
     except FileExistsError:
         pass
-    videos = [('flex1', 300)]
+    videos = ['flex1']
 
     # Create a signal handler to finish as soon as possible
     killer = GracefulKiller()
-    while not killer.kill_now:
+    while True:
+        if killer.kill_now:
+            exit()
         killer.shutdown_withold = True
 
         queue = sorted(map(str, Path(queuePath).iterdir()), key=os.path.getctime, reverse=True) #build queue
         while queue:
             submission = queue.pop()
+            subfile = str(submission).split('/')[-1]
             with open(submission, 'w') as scoreCSVFile:
                 scoreCSV = csv.writer(scoreCSVFile)
                 scoreCSV.writerow(["video_name", "accuracy", "energy", "error_status", "run_time", "perfomance_score"])
-                subfile = str(submission).split('/')[-1]
-                for video, videoLength in videos:
-                    error, runtime = testSubmission(subfile, video)
+                setupSubmission(subfile)
+                for video in videos:
+                    error, runtime = runOnVideo(video)
                     crunchScore(video, subfile, scoreCSV, videoLength, error, runtime)
-                    if killer.kill_now:
-                        exit()
-                reportScore(subfile, scoreCSV)
-                os.rename(submission, SITE + "/submissions/2020CVPR/20lpcvc_video/" + subfile + ".csv")
+                reportScore(subfile)
+            os.rename(submission, SITE + "/submissions/2020CVPR/20lpcvc_video/" + subfile + ".csv")
+            if killer.kill_now:
+                exit()
 
         killer.shutdown_withold = False
-        time.sleep(120)
-
-    exit()
+        time.sleep(10)
 
 
 def crunchScore(video, submission, scoreCSV, videoLength, error, runtime):
@@ -142,16 +151,17 @@ def crunchScore(video, submission, scoreCSV, videoLength, error, runtime):
     scoreCSV.writerow([video, ldAccuracy, power, error, runtime, final_score_a])
 
 
-def reportScore(submission, scoreCSV):
+def reportScore(submission):
     """
-    TODO: Tell the server to store the average result into the database
+    Tell the server to store the average result into the database
     """
     print(submission + " has been scored!")
+    requests.post(f"http://localhost:8000/organizers/video20/grade/{submission}")
 
 
 def testAndGrade(submission, video):
     error, run_time = testSubmission(submission, video)
-    ldAccuracy, power, final_score_a, final_score_b = calc_final_score("test_data/%s/realA.txt" % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv")
+    ldAccuracy, power, final_score_a = calc_final_score("test_data/%s/realA.txt" % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv")
     return ldAccuracy, power, error, run_time, final_score_a
 
 
