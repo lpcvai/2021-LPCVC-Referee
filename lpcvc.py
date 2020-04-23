@@ -132,10 +132,10 @@ def startQueue(queuePath, sleepTime):
                 scoreCSV.writerow(["video_name", "accuracy", "energy", "error_status", "run_time", "perfomance_score"])
                 setupSubmission(subfile)
                 for video in videos:
-                    error, runtime = runOnVideo(video)
-                    crunchScore(video, subfile, scoreCSV, videoLength, error, runtime)
-                reportScore(subfile)
+                    error, runtime = error, runtime = runOnVideo(video)
+                    crunchScore(video, subfile, scoreCSV, error, runtime)
             os.rename(submission, SITE + "/submissions/2020CVPR/20lpcvc_video/" + subfile + ".csv")
+            reportScore(subfile)
             if killer.kill_now:
                 exit()
 
@@ -143,7 +143,7 @@ def startQueue(queuePath, sleepTime):
         time.sleep(10)
 
 
-def crunchScore(video, submission, scoreCSV, videoLength, error, runtime):
+def crunchScore(video, submission, scoreCSV, error, runtime):
     """
     Process power.csv and dist.txt to get (video_name, accuracy, energy, score)
     """
@@ -156,7 +156,8 @@ def reportScore(submission):
     Tell the server to store the average result into the database
     """
     print(submission + " has been scored!")
-    requests.post(f"http://localhost:8000/organizers/video20/grade/{submission}")
+    time.sleep(0.2)
+    requests.get(f"http://localhost:8000/organizers/video20/grade/{submission}")
 
 
 def testAndGrade(submission, video):
@@ -215,9 +216,12 @@ if __name__ == "__main__":
         SITE = args.site
     del args.site
 
-    #if not hasattr(args, 'func'):
+    if not hasattr(args, 'func'):
         #parser.print_help()
         #exit()
+        args.func=testAndGrade
+        args.submission='test.pyz'
+        args.video='flex1'
 
     if args.func in (startQueue, testSubmission) and checkIfProcessRunning(sys.argv[0].split('/')[-1]):
         print("A queue process is already running. Please wait for it to finish.")
