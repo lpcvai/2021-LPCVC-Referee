@@ -89,9 +89,18 @@ def cycle(command=BASE_COMMAND):
 
 startCycle = True
 
-from flask import Flask, send_file
+from flask import Flask, send_file, Response, abort, request
 
 app = Flask(__name__)
+
+@app.before_request
+def limit_remote_addr():
+       if request.headers.getlist("X-Forwarded-For"):
+               ip = request.headers.getlist("X-Forwarded-For")[0]
+       else:
+               ip = request.remote_addr
+       if ip != '128.46.75.108':
+               abort(403)  # Forbidden
 
 @app.route("/")
 def haobo():
@@ -106,9 +115,9 @@ def haobo():
 		startCycle = True
 		try:
 			response = send_file(FILENAME)
-			response.headers['Program-Termination-Reason'] = error
-			response.headers['Program-Runtime'] = td
-			return response
 		except:
-			return ""
+			response = Response("")
+		response.headers['Program-Termination-Reason'] = error
+		response.headers['Program-Runtime'] = td
+		return response
 	return ("Task Already Running", 500)

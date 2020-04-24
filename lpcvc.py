@@ -72,12 +72,14 @@ def runOnVideo(video):
     #account for pcms crashing
     print('\u001b[1m\u001b[4mRunning submission\u001b[0m')
     with open(SITE + "/results/power.csv", "w") as power:
-        s = requests.Session()
-        r = s.get("http://meter.local/")
-        error = r.headers['Program-Termination-Reason']
-        runtime = float(r.headers['Program-Runtime'])
-        power.write(r.text)
-
+#        try:
+            s = requests.Session()
+            r = s.get("http://meter.local/")
+            error = r.headers['Program-Termination-Reason']
+            runtime = float(r.headers['Program-Runtime'])
+            power.write(r.text)
+#        except:
+#            pass
 
     #step 4: copy answer_txt from pi
     # name of output file? Currently any .txt file
@@ -157,7 +159,7 @@ def reportScore(submission):
     """
     print(submission + " has been scored!")
     time.sleep(0.2)
-    requests.get(f"http://localhost:8000/organizers/video20/grade/{submission}")
+    requests.get("https://lpcv.ai/organizers/video20/grade/%s" % (submission,), verify=False)
 
 
 def testAndGrade(submission, video):
