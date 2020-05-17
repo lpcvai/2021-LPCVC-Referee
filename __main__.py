@@ -1,0 +1,2 @@
+import lpcvc
+lpcvc.main()
