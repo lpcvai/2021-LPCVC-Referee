@@ -13,6 +13,11 @@ import sys
 import time
 
 SITE = os.path.expanduser('~/sites/lpcv.ai')
+SITE_URL = 'https://lpcv.ai'
+PI_TEST_DIR = '~/Documents/run_sub'
+METER_CMD = 'C:\\\\lpcvc\\\\WT310\\\\Debug\\\\test'
+METER_CSV = 'C:\\\\lpcvc\\\\WT310\\\\Debug\\\\monitor.csv'
+ANSWER_FORMAT = "test_data/%s/realA.txt"
 
 
 def checkIfProcessRunning(processName):
@@ -49,44 +54,39 @@ def getVersion(file):
 def setupSubmission(submission):
     #clear files in ~/Documents/run_sub
     print('\u001b[1m\u001b[4mCopying submission to Pi\u001b[0m')
-    os.system('ssh pi@referee.local "rm -r ~/Documents/run_sub/*"')
-    os.system('scp ./test_sub pi@referee.local:~/Documents/run_sub/test_sub')
-    os.system('ssh pi@referee.local "chmod +x ~/Documents/run_sub/test_sub"')
+    os.system('ssh pi@referee.local "rm -rf ' + PI_TEST_DIR + '/*"')
+    os.system('scp ./test_sub pi@referee.local:' + PI_TEST_DIR + '/test_sub')
+    os.system('ssh pi@referee.local "chmod +x ' + PI_TEST_DIR + '/test_sub"')
 
     #send user submission from ~/sites/lpcv.ai/submissions/ to r_pi
-    os.system("scp " + SITE + "/submissions/2020CVPR/20lpcvc_video/" + submission + " pi@referee.local:~/Documents/run_sub/solution.pyz")
+    os.system("scp " + SITE + "/submissions/2020CVPR/20lpcvc_video/" + submission + " pi@referee.local:" + PI_TEST_DIR + "/solution.pyz")
     print('\u001b[1m\u001b[4mExtracting submission on Pi\u001b[0m')
-    os.system('ssh pi@referee.local "unzip ~/Documents/run_sub/solution.pyz -d ~/Documents/run_sub/solution"')
+    os.system('ssh pi@referee.local "unzip ' + PI_TEST_DIR + '/solution.pyz -d ' + PI_TEST_DIR + '/solution"')
 
     #pip install requirements
     print('\u001b[1m\u001b[4mPIP installing requirements\u001b[0m')
-    os.system('ssh pi@referee.local "cd ~/Documents/run_sub; . ~/20cvpr/myenv/bin/activate.fish; pip3 install -r solution/requirements.txt"')
+    os.system('ssh pi@referee.local "cd ' + PI_TEST_DIR + ' && . ~/20cvpr/myenv/bin/activate.fish && pip3 install -r solution/requirements.txt"')
 
 
 def runOnVideo(video):
     #copy test video and question to r_pi
-    print('\u001b[1m\u001b[4mCopying test footage and questions to Pi\u001b[0m')
-    os.system("scp -r test_data/%s/pi pi@referee.local:~/Documents/run_sub/test_data" % (video,))
+    # print('\u001b[1m\u001b[4mCopying test footage and questions to Pi\u001b[0m')
+    # os.system("scp -r test_data/%s/pi pi@referee.local:" + PI_TEST_DIR + "/test_data" % (video,))
 
     #step 2: start meter.py on laptop, download pi_metrics.csv through http
     #account for pcms crashing
     print('\u001b[1m\u001b[4mRunning submission\u001b[0m')
-    with open(SITE + "/results/power.csv", "w") as power:
-#        try:
-            s = requests.Session()
-            r = s.get("http://meter.local/")
-            error = r.headers['Program-Termination-Reason']
-            runtime = float(r.headers['Program-Runtime'])
-            power.write(r.text)
-#        except:
-#            pass
+    os.system("ssh -t user@meter.local '" + METER_CMD + "'")
+    os.system("scp -T user@meter.local:" + METER_CSV + " " + os.path.join(SITE, "results/power.csv"))
+    with open(os.path.join(SITE, "results/power.csv"), "r") as powerfile:
+        power,time,error = powerfile.readlines()[1].split(',')
+        runtime = float(time)
+        error = error.strip()
 
     #step 4: copy answer_txt from pi
     # name of output file? Currently any .txt file
     print('\u001b[1m\u001b[4mScoring answers\u001b[0m')
-    os.system("scp pi@referee.local:~/Documents/run_sub/*.txt " + SITE + "/results")
-
-    return error, runtime
+    os.system("scp pi@referee.local:" + PI_TEST_DIR + "/*.txt " + SITE + "/results")
 
 
 def testSubmission(submission, video):
@@ -134,8 +134,8 @@ def startQueue(queuePath, sleepTime):
                 scoreCSV.writerow(["video_name", "accuracy", "energy", "error_status", "run_time", "perfomance_score"])
                 setupSubmission(subfile)
                 for video in videos:
-                    error, runtime = error, runtime = runOnVideo(video)
-                    crunchScore(video, subfile, scoreCSV, error, runtime)
+                    runOnVideo(video)
+                    crunchScore(video, subfile, scoreCSV)
             os.rename(submission, SITE + "/submissions/2020CVPR/20lpcvc_video/" + subfile + ".csv")
             reportScore(subfile)
             if killer.kill_now:
@@ -145,12 +145,12 @@ def startQueue(queuePath, sleepTime):
         time.sleep(10)
 
 
-def crunchScore(video, submission, scoreCSV, error, runtime):
+def crunchScore(video, submission, scoreCSV):
     """
-    Process power.csv and dist.txt to get (video_name, accuracy, energy, score)
+    Process power.csv and dist.txt to get (video_name, accuracy, energy, error, time, score)
     """
-    ldAccuracy, power, final_score_a = calc_final_score("test_data/%s/realA.txt" % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv")
-    scoreCSV.writerow([video, ldAccuracy, power, error, runtime, final_score_a])
+    ldAccuracy, energy, timeDurr, error, final_score_a = calc_final_score("test_data/%s/realA.txt" % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv")
+    scoreCSV.writerow([video, ldAccuracy, energy, error, timeDurr, final_score_a])
 
 
 def reportScore(submission):
@@ -159,12 +159,13 @@ def reportScore(submission):
     """
     print(submission + " has been scored!")
     time.sleep(0.2)
-    requests.get("https://lpcv.ai/organizers/video20/grade/%s" % (submission,), verify=False)
+    if SITE_URL:
+        requests.get(SITE_URL + "/organizers/video20/grade/%s" % (submission,), verify=False)
 
 
 def testAndGrade(submission, video):
     error, run_time = testSubmission(submission, video)
-    ldAccuracy, power, final_score_a = calc_final_score("test_data/%s/realA.txt" % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv")
+    ldAccuracy, power, final_score_a = calc_final_score(ANSWER_FORMAT % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv")
     return ldAccuracy, power, error, run_time, final_score_a
 
 

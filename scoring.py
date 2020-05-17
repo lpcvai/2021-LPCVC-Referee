@@ -5,15 +5,20 @@ MAX_POWER = 6.28232727
 
 def parsePowerFile(powerFile):
     """Returns Accumulated Energy from csv file"""
-    with open(powerFile, "r") as f:
-        lines = f.readlines()
+    try:
+        with open(powerFile, "r") as f:
+            lines = f.readlines()
 
-    if lines:
-        powerline = lines[-2]
-        powerdata = powerline.split(",")
-        energy = float(powerdata[7])
-        return energy
-    return -1
+        if lines:
+            powerline = lines[-1]
+            powerdata = powerline.split(",")
+            energy = float(powerdata[0])
+            timeDurr = float(powerdata[1])
+            error = powerdata[2]
+            return energy, timeDurr, error
+    except Exception:
+        pass
+    return -1, 0, '???'
 
 def calc_final_score(groundTruthFile, submissionFile, powerFile):
     """Returns a tuple containing accuracy, energy, and the final score
@@ -24,10 +29,10 @@ def calc_final_score(groundTruthFile, submissionFile, powerFile):
         return 0
     ldError = distanceCalc(groundTruthFile, submissionFile)
     ldAccuracy = 1 - ldError
-    energy = parsePowerFile(powerFile)
+    energy, timeDurr, error = parsePowerFile(powerFile)
     # Final score is calculated. If energy has a bad value the final score is 0
     final_score = ldAccuracy / (energy) if energy != -1 else 0
-    return (ldAccuracy, energy, round(final_score,5))
+    return (ldAccuracy, energy, timeDurr, error, round(final_score,5))
 
 
 

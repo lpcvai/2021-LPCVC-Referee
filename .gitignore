@@ -131,3 +131,4 @@ dmypy.json
 
 # testing data
 test_data/
+queue/
