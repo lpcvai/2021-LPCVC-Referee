@@ -132,3 +132,6 @@ dmypy.json
 # testing data
 test_data/
 queue/
+
+.DS_Store
+nohup.out

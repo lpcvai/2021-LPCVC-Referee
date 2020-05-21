@@ -1,4 +1,2 @@
-#! /usr/bin/env fish
 #~/20cvpr/myenv/bin/python3 sub.pyz ~/Documents/test_data/video.MP4 ~/Documents/test_data/questions.txt
-. ~/20cvpr/myenv/bin/activate.fish
-python3 solution/ ~/Documents/run_sub/test_data/video.MP4 ~/Documents/run_sub/test_data/questions.txt
+python3 solution/ ~/testFiles/$1/$1.mp4 ~/testFiles/$1/question${1:(-2)}.txt

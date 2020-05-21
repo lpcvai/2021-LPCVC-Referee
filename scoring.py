@@ -14,7 +14,7 @@ def parsePowerFile(powerFile):
             powerdata = powerline.split(",")
             energy = float(powerdata[0])
             timeDurr = float(powerdata[1])
-            error = powerdata[2]
+            error = powerdata[2].strip()
             return energy, timeDurr, error
     except Exception:
         pass
@@ -27,9 +27,13 @@ def calc_final_score(groundTruthFile, submissionFile, powerFile):
     """
     if powerFile == None:
         return 0
-    ldError = distanceCalc(groundTruthFile, submissionFile)
-    ldAccuracy = 1 - ldError
     energy, timeDurr, error = parsePowerFile(powerFile)
+    try:
+        ldError = distanceCalc(groundTruthFile, submissionFile)
+        ldAccuracy = 1 - ldError
+    except Exception:
+        ldAccuracy = 0
+        error = 'WOF'
     # Final score is calculated. If energy has a bad value the final score is 0
     final_score = ldAccuracy / (energy) if energy != -1 else 0
     return (ldAccuracy, energy, timeDurr, error, round(final_score,5))
