@@ -9,7 +9,7 @@ import psutil
 import requests
 from scoring import calc_final_score
 import signal
-import subprocess
+from subprocess import Popen
 import sys
 import time
 
@@ -33,19 +33,21 @@ PI_USER = my_env.get('LPCVC_PI_USER', 'xiaohu@referee.local')
 METER_USER = my_env.get('LPCVC_METER_USER', 'user@meter.local')
 SHELL = my_env.get('LPCVC_SHELL', 'bash')
 if SHELL == 'bash':
-    SHELL = ''
+    SHELL_EXT = ''
 else:
-    SHELL = '.' + SHELL
+    SHELL_EXT = '.' + SHELL
 
 ENV_DIR = my_env.get('LPCVC_ENV_DIR', '~/facebook-sol/mysol')
 PI_TEST_DIR = my_env.get('LPCVC_PI_TEST_DIR', '~/contestant-sol/')
 TEST_SUB_SCRIPT = my_env.get('LPCVC_TEST_SUB_SCRIPT', '~/test_sub')
 SUBMISSION_DIR = my_env.get('LPCVC_SUBMISSION_DIR', SITE + '/submissions/2020CVPR/20lpcvc_video')
+TEST_DATA_DIR = my_env.get('LPCVC_TEST_DATA_DIR', "test_data")
 
-METER_CMD = my_env.get('LPCVC_METER_CMD', 'C:\\lpcvc\\python\\python.exe C:\\lpcvc\\WT310\\Debug\\wt310_client.py --pminf USB "C:\\Program Files\\OpenSSH\\ssh" -t ' + PI_USER + ' "cd ' + PI_TEST_DIR + ' && . ' + ENV_DIR + '/bin/activate' + SHELL + ' && ' + TEST_SUB_SCRIPT + ' %s"')
+METER_CMD = my_env.get('LPCVC_METER_CMD', 'C:\\lpcvc\\python\\python.exe -u C:\\lpcvc\\WT310\\Debug\\wt310_client.py --pmtimeout {timeout:d} --pminf USB "C:\\Program Files\\OpenSSH\\ssh" -tt ' + PI_USER + ' "cd ' + PI_TEST_DIR + ' && . ' + ENV_DIR + '/bin/activate' + SHELL_EXT + ' && ' + TEST_SUB_SCRIPT + ' {video}"')
 METER_CSV = my_env.get('LPCVC_METER_CSV', 'C:\\lpcvc\\WT310\\Debug\\monitor.csv').replace('\\', '\\\\')
-ANSWER_FORMAT = my_env.get('LPCVC_ANSWER_FORMAT', "test_data/%s/realA.txt")
 REFRESH_RATE = int(my_env.get('LPCVC_REFRESH_RATE', '10'))
+
+TEST_VIDEOS = my_env.get('LPCVC_TEST_VIDEOS', 'clip01 clip02').split()
 
 
 def checkIfProcessRunning(processName):
@@ -84,17 +86,23 @@ def setupSubmission(submission):
     Load the submission onto the Pi and install the requirements
     """
     #clear files in ~/Documents/run_sub
-    print('\u001b[1m\u001b[4mCopying submission to Pi\u001b[0m')
+    # print('\u001b[1m\u001b[4mCopying submission to Pi\u001b[0m')
     os.system('ssh ' + PI_USER + ' "rm -rf ' + PI_TEST_DIR + '/*"')
 
     #send user submission from ~/sites/lpcv.ai/submissions/ to r_pi
     os.system("scp " + SUBMISSION_DIR + "/" + submission + " " + PI_USER + ":" + PI_TEST_DIR + "/solution.pyz")
-    print('\u001b[1m\u001b[4mExtracting submission on Pi\u001b[0m')
-    os.system('ssh ' + PI_USER + ' "unzip ' + PI_TEST_DIR + '/solution.pyz -d ' + PI_TEST_DIR + '/solution"')
+    # print('\u001b[1m\u001b[4mExtracting submission on Pi\u001b[0m')
+    if Popen(['ssh', PI_USER, 'unzip', PI_TEST_DIR + '/solution.pyz', '-d', PI_TEST_DIR + '/solution']).wait() != 0:
+        print("ERROR: Cannot unzip the solution")
+        return False
 
     #pip install requirements
-    print('\u001b[1m\u001b[4mPIP installing requirements\u001b[0m')
-    os.system('ssh ' + PI_USER + ' "cd ' + PI_TEST_DIR + ' && . ' + ENV_DIR + '/bin/activate' + SHELL + ' && pip3 install -r solution/requirements.txt"')
+    # print('\u001b[1m\u001b[4mPIP installing requirements\u001b[0m')
+    if Popen(['ssh', PI_USER, SHELL, '-c', '"cd ' + os.path.join(PI_TEST_DIR, 'solution') + ' && . ' + ENV_DIR + '/bin/activate' + SHELL_EXT + ' && pip3 install -r requirements.txt"']).wait() != 0:
+        print("ERROR: Cannot install the requirements")
+        return False
+
+    return True
 
 
 def runOnVideo(video):
@@ -105,25 +113,32 @@ def runOnVideo(video):
     #step 2: start meter.py on laptop, download pi_metrics.csv through http
     #account for pcms crashing
     # print('\u001b[1m\u001b[4mRunning submission\u001b[0m')
-    os.system("ssh -t " + METER_USER + " '" + METER_CMD % (video,) + "'")
-    os.system("scp -T " + METER_USER + ":" + METER_CSV + " " + os.path.join(SITE, "results/power.csv"))
+    with open(os.path.join(TEST_DATA_DIR, video, "testlen.txt"), 'r') as testlen:
+        timeout = int(testlen.readline())
+
+    os.system('ssh ' + PI_USER + ' "rm -f ' + PI_TEST_DIR + '/answers.txt"')
+    if Popen(['stdbuf', '-o0', '-e0', "ssh", METER_USER, METER_CMD.format_map({'timeout': timeout, 'video': video})]).wait() != 0:
+        print("FATAL: Cannot start power meter", file=sys.stderr)
+        exit(1)
+    else:
+        os.system("scp -T " + METER_USER + ":" + METER_CSV + " " + os.path.join(SITE, "results/power.csv"))
 
     #step 4: copy answer_txt from pi
     # name of output file? Currently any .txt file
     # print('\u001b[1m\u001b[4mScoring answers\u001b[0m')
-    os.system("scp " + PI_USER + ":" + PI_TEST_DIR + "/*.txt " + SITE + "/results")
+        os.system("scp -T " + PI_USER + ":" + PI_TEST_DIR + "/answers.txt " + SITE + "/results")
 
 
 def testSubmission(submission, videos):
-    setupSubmission(submission)
     data = {}
-    for video in videos:
-        runOnVideo(video)
-        with open(os.path.join(SITE, "results/power.csv"), "r") as powerfile:
-            power,time,error = powerfile.readlines()[1].split(',')
-            runtime = float(time)
-            error = error.strip()
-        data[video] = [error, runtime]
+    if setupSubmission(submission):
+        for video in videos:
+            runOnVideo(video)
+            with open(os.path.join(SITE, "results/power.csv"), "r") as powerfile:
+                power,time,error = powerfile.readlines()[1].split(',')
+                runtime = float(time)
+                error = error.strip()
+            data[video] = [error, runtime]
     return data
 
 
@@ -162,13 +177,17 @@ def startQueue(queuePath, sleepTime):
         while queue:
             submission = queue.pop()
             subfile = str(submission).split('/')[-1]
+            # print('\u001b[1m\u001b[4mRunning submission ' + subfile + '\u001b[0m')
             with open(submission, 'w') as scoreCSVFile:
                 scoreCSV = csv.writer(scoreCSVFile)
                 scoreCSV.writerow(["video_name", "accuracy", "energy", "error_status", "run_time", "perfomance_score"])
-                setupSubmission(subfile)
-                for video in videos:
-                    runOnVideo(video)
-                    crunchScore(video, subfile, scoreCSV)
+                if setupSubmission(subfile):
+                    for video in videos:
+                        runOnVideo(video)
+                        crunchScore(video, subfile, scoreCSV)
+                else:
+                    for video in videos:
+                        scoreCSV.writerow([video, 0, 0, 'CTE', 0, 0])
             os.rename(submission, SUBMISSION_DIR + "/" + subfile + ".csv")
             reportScore(subfile)
             if killer.kill_now:
@@ -182,7 +201,7 @@ def crunchScore(video, submission, scoreCSV):
     """
     Process power.csv and dist.txt to get (video_name, accuracy, energy, error, time, score)
     """
-    ldAccuracy, energy, timeDurr, error, final_score_a = calc_final_score(ANSWER_FORMAT % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv")
+    ldAccuracy, energy, timeDurr, error, final_score_a = calc_final_score(os.path.join(TEST_DATA_DIR, video, "realA.txt"), SITE + "/results/answers.txt", SITE + "/results/power.csv")
     scoreCSV.writerow([video, ldAccuracy, energy, error, timeDurr, final_score_a])
 
 
@@ -190,19 +209,19 @@ def reportScore(submission):
     """
     Tell the server to store the average result into the database
     """
-    print(submission + " has been scored!")
+    print("INFO: " + submission + " has been scored!\n\n\n\n==================\n")
     time.sleep(0.2)
     if SITE_URL:
         requests.get(SITE_URL + "/organizers/video20/grade/%s" % (submission,), verify=False)
 
 
 def testAndGrade(submission, videos):
-    setupSubmission(submission)
     data = {}
-    for video in videos:
-        runOnVideo(video)
-        ldAccuracy, power, error, run_time, final_score_a = calc_final_score(ANSWER_FORMAT % (video,), SITE + "/results/answers.txt", SITE + "/results/power.csv")
-        data[video] = [ldAccuracy, power, error, run_time, final_score_a]
+    if setupSubmission(submission):
+        for video in videos:
+            runOnVideo(video)
+            ldAccuracy, power, error, run_time, final_score_a = calc_final_score(os.path.join(TEST_DATA_DIR, video, "realA.txt"), SITE + "/results/answers.txt", SITE + "/results/power.csv")
+            data[video] = [ldAccuracy, power, error, run_time, final_score_a]
     return data
 
 def setupPi():
@@ -225,7 +244,7 @@ def main():
     subs = parser.add_subparsers()
 
     tG_parser = subs.add_parser('', help='default option for compatibility; test and grade a single submission')
-    tG_parser.set_defaults(func=testAndGrade, submission='test.pyz', videos=['clip01', 'clip02'])
+    tG_parser.set_defaults(func=testAndGrade, submission='test.pyz', videos=TEST_VIDEOS)
     tG_parser.add_argument('submission', help="file name of the submission", nargs='?')
     tG_parser.add_argument('videos', help="name of the video to test on", nargs='*')
 
@@ -236,7 +255,7 @@ def main():
     r_parser.add_argument('sleepTime', help="amount of time to sleep in between rounds of tests", nargs='?', type=float)
 
     t_parser = subs.add_parser('t', help='test a single submission')
-    t_parser.set_defaults(func=testSubmission, submission='test.pyz', videos=['clip01', 'clip02'])
+    t_parser.set_defaults(func=testSubmission, submission='test.pyz', videos=TEST_VIDEOS)
     t_parser.add_argument('submission', help="file name of the submission", nargs='?')
     t_parser.add_argument('videos', help="name of the video to test on", nargs='*')
 
@@ -246,11 +265,10 @@ def main():
     g_parser.add_argument('aTxtName', help="path of the submitted answers.txt file", nargs='?')
 
     G_parser = subs.add_parser('G', help='grade using all files')
-    G_parser.set_defaults(func=calc_final_score, submissionFile=SITE + "/results/answers.txt", powerFile=SITE + "/results/power.csv", videoLength=300)
+    G_parser.set_defaults(func=calc_final_score, submissionFile=SITE + "/results/answers.txt", powerFile=SITE + "/results/power.csv")
     G_parser.add_argument('groundTruthFile', help="path of the real answers.txt file")
     G_parser.add_argument('submissionFile', help="path of the submitted answers.txt file", nargs='?')
     G_parser.add_argument('powerFile', help="path of the power.csv file", nargs='?')
-    G_parser.add_argument('videoLength', help="length of the video in seconds (default 300)", nargs='?', type=int)
     args = parser.parse_args()
 
     if not hasattr(args, 'func'):
@@ -258,7 +276,7 @@ def main():
         #exit()
         args.func=testAndGrade
         args.submission='test.pyz'
-        args.videos=['clip01', 'clip02']
+        args.videos=TEST_VIDEOS
 
     if args.func in (startQueue, testSubmission) and checkIfProcessRunning(sys.argv[0].split('/')[-1]):
         print("A queue process is already running. Please wait for it to finish.")

@@ -28,12 +28,15 @@ def calc_final_score(groundTruthFile, submissionFile, powerFile):
     if powerFile == None:
         return 0
     energy, timeDurr, error = parsePowerFile(powerFile)
-    try:
-        ldError = distanceCalc(groundTruthFile, submissionFile)
-        ldAccuracy = 1 - ldError
-    except Exception:
+    if error == '':
+        try:
+            ldError = distanceCalc(groundTruthFile, submissionFile)
+            ldAccuracy = 1 - ldError
+        except Exception:
+            ldAccuracy = 0
+            error = 'WOF'
+    else:
         ldAccuracy = 0
-        error = 'WOF'
     # Final score is calculated. If energy has a bad value the final score is 0
     final_score = ldAccuracy / (energy) if energy != -1 else 0
     return (ldAccuracy, energy, timeDurr, error, round(final_score,5))
