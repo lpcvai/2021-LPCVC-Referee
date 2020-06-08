@@ -2,6 +2,7 @@ import sys
 from LDCalc import distanceCalc
 
 MAX_POWER = 6.28232727
+MIN_POWER = 0.000544746733
 
 def parsePowerFile(powerFile):
     """Returns Accumulated Energy from csv file"""
@@ -37,6 +38,7 @@ def calc_final_score(groundTruthFile, submissionFile, powerFile):
             error = 'WOF'
     else:
         ldAccuracy = 0
+    energy -= timeDurr * MIN_POWER
     # Final score is calculated. If energy has a bad value the final score is 0
     final_score = ldAccuracy / (energy) if energy != -1 else 0
     return (ldAccuracy, energy, timeDurr, error, round(final_score,5))

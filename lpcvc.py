@@ -40,6 +40,7 @@ else:
 ENV_DIR = my_env.get('LPCVC_ENV_DIR', '~/facebook-sol/mysol')
 PI_TEST_DIR = my_env.get('LPCVC_PI_TEST_DIR', '~/contestant-sol/')
 TEST_SUB_SCRIPT = my_env.get('LPCVC_TEST_SUB_SCRIPT', '~/test_sub')
+PI_FIREWALL_SCRIPT = my_env.get('LPCVC_PI_FIREWALL_SCRIPT', '~/piFirewall.sh')
 SUBMISSION_DIR = my_env.get('LPCVC_SUBMISSION_DIR', SITE + '/submissions/2020CVPR/20lpcvc_video')
 TEST_DATA_DIR = my_env.get('LPCVC_TEST_DATA_DIR', "test_data")
 
@@ -47,7 +48,7 @@ METER_CMD = my_env.get('LPCVC_METER_CMD', 'C:\\lpcvc\\python\\python.exe -u C:\\
 METER_CSV = my_env.get('LPCVC_METER_CSV', 'C:\\lpcvc\\WT310\\Debug\\monitor.csv').replace('\\', '\\\\')
 REFRESH_RATE = int(my_env.get('LPCVC_REFRESH_RATE', '10'))
 
-TEST_VIDEOS = my_env.get('LPCVC_TEST_VIDEOS', 'clip01 clip02').split()
+TEST_VIDEOS = my_env.get('LPCVC_TEST_VIDEOS', 'test01_FlexBase_edited3min test02_Flex3rd_part1 test02_Flex3rd_part2 test03_clip2 test04_FlexBase02_part1').split()
 
 
 def checkIfProcessRunning(processName):
@@ -164,7 +165,7 @@ def startQueue(queuePath, sleepTime):
         os.mkdir(queuePath)
     except FileExistsError:
         pass
-    videos = ['clip01', 'clip02']
+    videos = TEST_VIDEOS
 
     # Create a signal handler to finish as soon as possible
     killer = GracefulKiller()
@@ -228,7 +229,9 @@ def setupPi():
     os.system('ssh ' + PI_USER + ' "mkdir ' + os.path.dirname(ENV_DIR) + '; mkdir ' + PI_TEST_DIR + '"')
     os.system('ssh ' + PI_USER + ' "python3.8 -m venv --system-site-packages --prompt LPCVC-UAV ' + ENV_DIR + '"')
     os.system('scp ./test_sub ' + PI_USER + ':' + TEST_SUB_SCRIPT)
+    os.system('scp ./piFirewall.sh ' + PI_USER + ':' + PI_FIREWALL_SCRIPT)
     os.system('ssh ' + PI_USER + ' "chmod +x ' + TEST_SUB_SCRIPT +'"')
+    os.system('ssh ' + PI_USER + ' "chmod +x ' + PI_FIREWALL_SCRIPT +'"')
 
 
 def main():

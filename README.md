@@ -33,7 +33,7 @@ Create another SSH key for the computer using the ssh-keygen.exe utility. Add th
 Run the following commands on the Raspberry Pi.
 ```bash
 sudo dnf update
-sudo dnf install git cmake ninja-build clang unzip distcc python3-virtualenv python3-devel python3-opencv gstreamer1-plugins-base gstreamer1-plugins-good unzip
+sudo dnf install git cmake ninja-build clang unzip distcc python3-virtualenv python3-devel python3-opencv python-pillow gstreamer1-plugins-base gstreamer1-plugins-good
 sudo reboot
 ```
 Create a virtual environment for the solutions with the `--site-packages` option. Create an empty folder for the testing of the submissions. Update the `PI_TEST_DIR` variable of the lpcvc.py file in this repository.

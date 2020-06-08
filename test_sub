@@ -1,2 +1,2 @@
 #~/20cvpr/myenv/bin/python3 sub.pyz ~/Documents/test_data/video.MP4 ~/Documents/test_data/questions.txt
-python3 solution/ ~/testFiles/$1/$1.mp4 ~/testFiles/$1/question${1:(-2)}.txt
+python3 solution/ ~/testFiles/$1/$(ls ~/testFiles/$1/ | grep $1\..*) ~/testFiles/$1/questions.txt
