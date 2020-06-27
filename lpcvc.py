@@ -99,9 +99,11 @@ def setupSubmission(submission):
 
     #pip install requirements
     # print('\u001b[1m\u001b[4mPIP installing requirements\u001b[0m')
+    os.system('ssh ' + PI_USER + ' -tt "sudo ' + PI_FIREWALL_SCRIPT + ' allow"')
     if Popen(['ssh', PI_USER, SHELL, '-c', '"cd ' + os.path.join(PI_TEST_DIR, 'solution') + ' && . ' + ENV_DIR + '/bin/activate' + SHELL_EXT + ' && pip3 install -r requirements.txt"']).wait() != 0:
         print("ERROR: Cannot install the requirements")
         return False
+    os.system('ssh ' + PI_USER + ' -tt "sudo ' + PI_FIREWALL_SCRIPT + ' block"')
 
     return True
 

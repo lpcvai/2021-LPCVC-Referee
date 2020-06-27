@@ -1,1 +1,0 @@
-EXIT:STAIR 1 STAR 1 ; GTR:a Bort 1 Skyline R34 ; 
