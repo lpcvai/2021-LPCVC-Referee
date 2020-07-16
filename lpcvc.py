@@ -88,7 +88,9 @@ def setupSubmission(submission):
     """
     #clear files in ~/Documents/run_sub
     # print('\u001b[1m\u001b[4mCopying submission to Pi\u001b[0m')
-    os.system('ssh ' + PI_USER + ' "rm -rf ' + PI_TEST_DIR + '/*"')
+    if Popen(['ssh', PI_USER, 'rm -rf ' + PI_TEST_DIR + '/*']).wait() != 0:
+        print("ERROR: Raspberry Pi mysteriously disconnected or incorrectly set up")
+        exit(1)
 
     #send user submission from ~/sites/lpcv.ai/submissions/ to r_pi
     os.system("scp " + SUBMISSION_DIR + "/" + submission + " " + PI_USER + ":" + PI_TEST_DIR + "/solution.pyz")
