@@ -1,7 +1,7 @@
 # 2020-LPCVC-Referee
 The evaluation system (referee) for the 2020 Low Power Computer Vision Challenge.
 
-![Workflow Components and Layout](/.github/workflow.jpg)
+![Workflow Components and Layout](.github/workflow.jpg)
 
 ## Required Hardware and Software
  - Yokogawa WT310 Power Meter (discontinued, substitutable with the [WT310E](https://www.electro-meters.com/yokogawa/yokogawa-power-meters/wt300e/) model)
