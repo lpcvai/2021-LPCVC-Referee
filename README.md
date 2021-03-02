@@ -1,5 +1,5 @@
-# 2020-LPCVC-Referee
-The evaluation system (referee) for the 2020 Low Power Computer Vision Challenge.
+# LPCVC-Referee
+The evaluation systems (referee) for the 2020 and 2021 Low Power Computer Vision Challenge.
 
 ![Workflow Components and Layout](.github/workflow.jpg)
 
@@ -13,10 +13,10 @@ The evaluation system (referee) for the 2020 Low Power Computer Vision Challenge
    - [Python 3](https://www.python.org/downloads/windows/)
    - OpenSSH ([Windows 10](https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse), [before Windows 10](https://github.com/PowerShell/openssh-portable/releases))
    - [HELPS WT310 Controlling Program](https://github.com/anivegesana/WT310)
- - Raspberry Pi
+ - Raspberry Pi (__Subject to Change for 2021__)
    - [Fedora 32 Minimal](https://fedoraproject.org/wiki/Architectures/ARM/Raspberry_Pi)
 
-## System Setup
+## System Setup (__Subject to Change for 2021__)
 
 ### Setting up the Yokogawa WT310 Power Meter
 The power meter must be connected so that it can record the power consumption of the Pi.
