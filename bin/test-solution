@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 
-from lpcvc import DataSet
+from lpcvc.LPCVC2021.data_set import DataSet
 import argparse
-
-from lpcvc.compare import Compare
+from lpcvc.LPCVC2021.compare import Compare
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -12,8 +11,8 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--threshold', help='Limit Cutoff of Number of Frames You Can Be Off', default=10)
     args = parser.parse_args()
 
-    expected = DataSet(file_name=args.expected)
-    actual = DataSet(file_name=args.actual)
+    correct = DataSet(file_name=args.expected)
+    submitted = DataSet(file_name=args.actual)
 
-    c = Compare(expected, actual, args.threshold)
+    c = Compare(correct, submitted, args.threshold)
     print(c.score())

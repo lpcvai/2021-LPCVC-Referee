@@ -1,5 +1,5 @@
 import sys
-from LDCalc import distanceCalc
+from ld_calc import distance_calculator
 
 MAX_POWER = 6.28232727
 MIN_POWER = 0.000544746733
@@ -31,7 +31,7 @@ def calc_final_score(groundTruthFile, submissionFile, powerFile):
     energy, timeDurr, error = parsePowerFile(powerFile)
     if error == '':
         try:
-            ldError = distanceCalc(groundTruthFile, submissionFile)
+            ldError = distance_calculator(groundTruthFile, submissionFile)
             ldAccuracy = 1 - ldError
         except Exception:
             ldAccuracy = 0
