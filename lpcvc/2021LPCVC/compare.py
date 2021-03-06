@@ -1,4 +1,4 @@
-from lpcvc import DataSet
+from lpcvc.lpcvc import DataSet
 
 
 def calculate_correct(expected, actual):
