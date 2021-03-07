@@ -1,18 +1,17 @@
 #!/usr/bin/env python3
 
-from lpcvc.LPCVC2021.data_set import DataSet
+from lpcvc.LPCVC2021 import DataSet, Compare
 import argparse
-from lpcvc.LPCVC2021.compare import Compare
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('actual', default=None)
-    parser.add_argument('expected', default=None)
+    parser.add_argument('submitted', default=None, help="You Submission")
+    parser.add_argument('correct', default=None, help="Ground Truth")
     parser.add_argument('-t', '--threshold', help='Limit Cutoff of Number of Frames You Can Be Off', default=10)
     args = parser.parse_args()
 
-    correct = DataSet(file_name=args.expected)
-    submitted = DataSet(file_name=args.actual)
+    correct = DataSet(file_name=args.correct)
+    submitted = DataSet(file_name=args.submitted)
 
     c = Compare(correct, submitted, args.threshold)
     print(c.score())

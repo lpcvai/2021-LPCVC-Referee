@@ -4,45 +4,46 @@ from ld_calc import distance_calculator
 MAX_POWER = 6.28232727
 MIN_POWER = 0.000544746733
 
-def parsePowerFile(powerFile):
+
+def parse_power_file(power_file):
     """Returns Accumulated Energy from csv file"""
     try:
-        with open(powerFile, "r") as f:
+        with open(power_file, "r") as f:
             lines = f.readlines()
 
-        if lines:
+        if lines and len(lines) > 0:
             powerline = lines[-1]
-            powerdata = powerline.split(",")
-            energy = float(powerdata[0])
-            timeDurr = float(powerdata[1])
-            error = powerdata[2].strip()
-            return energy, timeDurr, error
-    except Exception:
+            power_data = powerline.split(",")
+            energy = float(power_data[0])
+            time_duration = float(power_data[1])
+            error = power_data[2].strip()
+            return energy, time_duration, error
+    except FileNotFoundError:
         pass
     return -1, 0, '???'
 
-def calc_final_score(groundTruthFile, submissionFile, powerFile):
+
+def calc_final_score(ground_truth_file, submission_file, power_file):
     """Returns a tuple containing accuracy, energy, and the final score
 
     Final Score = Levenshtein Word Score / Accumulated Energy
     """
-    if powerFile == None:
+    if power_file is None:
         return 0
-    energy, timeDurr, error = parsePowerFile(powerFile)
+    energy, duration, error = parse_power_file(power_file)
     if error == '':
         try:
-            ldError = distance_calculator(groundTruthFile, submissionFile)
-            ldAccuracy = 1 - ldError
-        except Exception:
-            ldAccuracy = 0
+            ld_error = distance_calculator(ground_truth_file, submission_file)
+            ld_accuracy = 1 - ld_error
+        except FileNotFoundError:
+            ld_accuracy = 0
             error = 'WOF'
     else:
-        ldAccuracy = 0
-    energy -= timeDurr * MIN_POWER
+        ld_accuracy = 0
+    energy -= duration * MIN_POWER
     # Final score is calculated. If energy has a bad value the final score is 0
-    final_score = ldAccuracy / (energy) if energy != -1 else 0
-    return (ldAccuracy, energy, timeDurr, error, round(final_score,5))
-
+    final_score = ld_accuracy / energy if energy != -1 else 0
+    return ld_accuracy, energy, duration, error, round(final_score, 5)
 
 
 if __name__ == '__main__':

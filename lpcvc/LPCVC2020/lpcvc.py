@@ -182,23 +182,24 @@ def start_queue(queue_path):
             exit()
         killer.shutdown_withold = True
 
-        queue = sorted(map(str, Path(queue_path).iterdir()), key=os.path.getctime, reverse=True)  # build queue
+        # build queue
+        queue = sorted(map(str, Path(queue_path).iterdir()), key=os.path.getctime, reverse=True)
         while queue:
             submission = queue.pop()
-            subfile = str(submission).split('/')[-1]
-            # print('\u001b[1m\u001b[4mRunning submission ' + subfile + '\u001b[0m')
+            sub_file_name = str(submission).split('/')[-1]
+            # print('\u001b[1m\u001b[4mRunning submission ' + sub_file_name + '\u001b[0m')
             with open(submission, 'w') as scoreCSVFile:
-                scoreCSV = csv.writer(scoreCSVFile)
-                scoreCSV.writerow(["video_name", "accuracy", "energy", "error_status", "run_time", "perfomance_score"])
-                if setup_submission(subfile):
+                score_fp = csv.writer(scoreCSVFile)
+                score_fp.writerow(["video_name", "accuracy", "energy", "error_status", "run_time", "performance_score"])
+                if setup_submission(sub_file_name):
                     for video in videos:
                         run_on_video(video)
-                        crunchScore(video, subfile, scoreCSV)
+                        crush_score(video, sub_file_name, score_fp)
                 else:
                     for video in videos:
-                        scoreCSV.writerow([video, 0, 0, 'CTE', 0, 0])
-            os.rename(submission, SUBMISSION_DIR + "/" + subfile + ".csv")
-            reportScore(subfile)
+                        score_fp.writerow([video, 0, 0, 'CTE', 0, 0])
+            os.rename(submission, SUBMISSION_DIR + "/" + sub_file_name + ".csv")
+            report_score(sub_file_name)
             if killer.kill_now:
                 exit()
 
@@ -206,16 +207,16 @@ def start_queue(queue_path):
         time.sleep(REFRESH_RATE)
 
 
-def crunchScore(video, submission, scoreCSV):
+def crush_score(video, score_cvs):
     """
     Process power.csv and dist.txt to get (video_name, accuracy, energy, error, time, score)
     """
-    ldAccuracy, energy, timeDurr, error, final_score_a = calc_final_score(
+    ld_accuracy, energy, duration, error, final_score_a = calc_final_score(
         os.path.join(TEST_DATA_DIR, video, "realA.txt"), SITE + "/results/answers.txt", SITE + "/results/power.csv")
-    scoreCSV.writerow([video, ldAccuracy, energy, error, timeDurr, final_score_a])
+    score_cvs.writerow([video, ld_accuracy, energy, error, duration, final_score_a])
 
 
-def reportScore(submission):
+def report_score(submission):
     """
     Tell the server to store the average result into the database
     """
@@ -225,19 +226,19 @@ def reportScore(submission):
         requests.get(SITE_URL + "/organizers/video20/grade/%s" % (submission,), verify=False)
 
 
-def testAndGrade(submission, videos):
+def test_and_grade(submission, videos):
     data = {}
     if setup_submission(submission):
         for video in videos:
             run_on_video(video)
-            ldAccuracy, power, error, run_time, final_score_a = calc_final_score(
+            ld_accuracy, power, error, run_time, final_score_a = calc_final_score(
                 os.path.join(TEST_DATA_DIR, video, "realA.txt"), SITE + "/results/answers.txt",
-                SITE + "/results/power.csv")
-            data[video] = [ldAccuracy, power, error, run_time, final_score_a]
+                                                                 SITE + "/results/power.csv")
+            data[video] = [ld_accuracy, power, error, run_time, final_score_a]
     return data
 
 
-def setupPi():
+def setup_pi():
     os.system('ssh ' + PI_USER + ' "mkdir ' + os.path.dirname(ENV_DIR) + '; mkdir ' + PI_TEST_DIR + '"')
     os.system('ssh ' + PI_USER + ' "python3.8 -m venv --system-site-packages --prompt LPCVC-UAV ' + ENV_DIR + '"')
     os.system('scp ./test_sub ' + PI_USER + ':' + TEST_SUB_SCRIPT)
@@ -250,57 +251,58 @@ def main():
     import argparse
     from ld_calc import distance_calculator
 
-    queuePath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'queue')
+    queue_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'queue')
 
-    parser = argparse.ArgumentParser(description='LPCVC UAV Track Submission Queue and Grader',
-                                     epilog="The suggested way to start the queue is by using the /etc/init.d script. "
-                                            "Please use that instead to start and stop the queue in production. This "
-                                            "script is primarily used as a library for that script and for testing.")
-    subs = parser.add_subparsers()
+    arg_handler = argparse.ArgumentParser(description='LPCVC UAV Track Submission Queue and Grader',
+                                          epilog="The suggested way to start the queue is by using the /etc/init.d script. "
+                                                 "Please use that instead to start and stop the queue in production. This "
+                                                 "script is primarily used as a library for that script and for testing.")
+    sub_arguments = arg_handler.add_subparsers()
 
-    tG_parser = subs.add_parser('', help='default option for compatibility; test and grade a single submission')
-    tG_parser.set_defaults(func=testAndGrade, submission='test.pyz', videos=TEST_VIDEOS)
-    tG_parser.add_argument('submission', help="file name of the submission", nargs='?')
-    tG_parser.add_argument('videos', help="name of the video to test on", nargs='*')
+    tg_parser = sub_arguments.add_parser('',
+                                         help='default option for compatibility; test and grade a single submission')
+    tg_parser.set_defaults(func=test_and_grade, submission='test.pyz', videos=TEST_VIDEOS)
+    tg_parser.add_argument('submission', help="file name of the submission", nargs='?')
+    tg_parser.add_argument('videos', help="name of the video to test on", nargs='*')
 
-    r_parser = subs.add_parser('r', help='start the queue')
-    r_parser.set_defaults(func=start_queue, queuePath=queuePath, sleepTime=120)
+    r_parser = sub_arguments.add_parser('r', help='start the queue')
+    r_parser.set_defaults(func=start_queue, queuePath=queue_path, sleepTime=120)
 
     r_parser.add_argument('queuePath', help="directory on the system to store the queue", nargs='?')
     r_parser.add_argument('sleepTime', help="amount of time to sleep in between rounds of tests", nargs='?', type=float)
 
-    t_parser = subs.add_parser('t', help='test a single submission')
+    t_parser = sub_arguments.add_parser('t', help='test a single submission')
     t_parser.set_defaults(func=test_submission, submission='test.pyz', videos=TEST_VIDEOS)
     t_parser.add_argument('submission', help="file name of the submission", nargs='?')
     t_parser.add_argument('videos', help="name of the video to test on", nargs='*')
 
-    g_parser = subs.add_parser('g', help='grade an answers.txt file')
+    g_parser = sub_arguments.add_parser('g', help='grade an answers.txt file')
     g_parser.set_defaults(func=distance_calculator, aTxtName=SITE + "/results/answers.csv")
     g_parser.add_argument('realATxtName', help="path of the real answers.txt file")
     g_parser.add_argument('aTxtName', help="path of the submitted answers.txt file", nargs='?')
 
-    G_parser = subs.add_parser('G', help='grade using all files')
-    G_parser.set_defaults(func=calc_final_score, submissionFile=SITE + "/results/answers.txt",
+    g_parser = sub_arguments.add_parser('G', help='grade using all files')
+    g_parser.set_defaults(func=calc_final_score, submissionFile=SITE + "/results/answers.txt",
                           powerFile=SITE + "/results/power.csv")
-    G_parser.add_argument('groundTruthFile', help="path of the real answers.txt file")
-    G_parser.add_argument('submissionFile', help="path of the submitted answers.txt file", nargs='?')
-    G_parser.add_argument('powerFile', help="path of the power.csv file", nargs='?')
-    args = parser.parse_args()
+    g_parser.add_argument('groundTruthFile', help="path of the real answers.txt file")
+    g_parser.add_argument('submissionFile', help="path of the submitted answers.txt file", nargs='?')
+    g_parser.add_argument('powerFile', help="path of the power.csv file", nargs='?')
+    arguments = arg_handler.parse_args()
 
-    if not hasattr(args, 'func'):
+    if not hasattr(arguments, 'func'):
         # parser.print_help()
         # exit()
-        args.func = testAndGrade
-        args.submission = 'test.pyz'
-        args.videos = TEST_VIDEOS
+        arguments.func = test_and_grade
+        arguments.submission = 'test.pyz'
+        arguments.videos = TEST_VIDEOS
 
-    if args.func in (start_queue, test_submission) and check_if_process_running(sys.argv[0].split('/')[-1]):
+    if arguments.func in (start_queue, test_submission) and check_if_process_running(sys.argv[0].split('/')[-1]):
         print("A queue process is already running. Please wait for it to finish.")
         exit(1)
 
-    func = args.func
-    del args.func
-    output = func(**vars(args))
+    func = arguments.func
+    output = func(**vars(arguments))
+    del arguments.func
     if output is not None:
         print("Operation returned " + str(output))
 
