@@ -135,3 +135,5 @@ queue/
 
 .DS_Store
 nohup.out
+
+.idea/

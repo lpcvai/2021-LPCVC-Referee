@@ -1,4 +1,4 @@
-from lpcvc import DataSet
+from .data_set import DataSet
 
 
 def calculate_correct(expected, actual):
@@ -14,9 +14,9 @@ def calculate_correct(expected, actual):
 
 class Compare:
 
-    def __init__(self, expected: DataSet, actual: DataSet, threshold):
-        self.expected: DataSet = expected
-        self.actual: DataSet = actual
+    def __init__(self, correct: DataSet, submitted: DataSet, threshold):
+        self.expected: DataSet = correct
+        self.actual: DataSet = submitted
         self.threshold = threshold
         self.same_points: DataSet = DataSet()
         self.compare()
