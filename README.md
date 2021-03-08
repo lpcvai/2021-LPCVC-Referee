@@ -1,7 +1,7 @@
 # LPCVC-Referee
 The evaluation systems (referee) for the 2020 and 2021 Low Power Computer Vision Challenge.
 
-![Workflow Components and Layout](.github/workflow.jpg)
+![Workflow Components and Layout](.github/pictures/workflow.jpg)
 
 ## Required Hardware and Software
  - Yokogawa WT310 Power Meter (discontinued, substitutable with the [WT310E](https://www.electro-meters.com/yokogawa/yokogawa-power-meters/wt300e/) model)
@@ -57,6 +57,8 @@ Submitted CSV File: Result CSV file from submission.
 Correct CSV File: The Ground Truth CSV file.
 
 The end goal is for the Submitted CSV File to closely relate to the Correct CSV File in order to detect the accuracy of your solution.  
+
+### How The Score is Determined
 
 ## Using the Referee (2020)
 
