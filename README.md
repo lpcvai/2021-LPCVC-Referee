@@ -52,7 +52,7 @@ This will make the script 'test-solution' available to you in any working direct
 ```bash
 test-solution [-t Threshold] [Submitted CSV file] [Correct CSV File]
 ```
-Threshold: Integer that corresponding to the number of frames away the submitted input can be away from the correct input as when a ball is caught. This is an optional argument, and the default is 10.
+Threshold: Integer that correspons to the number of frames away the submitted input answer can be from the correct input when tracking when a ball is caught. This is an optional argument, and the default is 10.
 Submitted CSV File: Result CSV file from submission.
 Correct CSV File: The Ground Truth CSV file.
 
