@@ -40,7 +40,25 @@ Create a virtual environment for the solutions with the `--site-packages` option
 Create yet another SSH key for the Linux Server using the ssh-keygen utility. Add all three keys to the authorized_keys file in the ~/.ssh folder using the ssh-add utility.
 __DO NOT__ add the Pi's key to the other two machines. Doing so is a security risk.
 
-## Using the Referee
+## Using the Referee (2021)
+
+### Installing Program to Score Submission
+You need to clone this repository, and then run the following command.
+```bash
+python3 setup.py install
+```
+This will make the script 'test-solution' available to you in any working directory. As a result, you can run the program from any directory without the need to pinpoint the location of the script.
+
+```bash
+test-solution [-t Threshold] [Submitted CSV file] [Correct CSV File]
+```
+Threshold: Integer that corresponding to the number of frames away the submitted input can be away from the correct input as when a ball is caught. This is an optional argument, and the default is 10.
+Submitted CSV File: Result CSV file from submission.
+Correct CSV File: The Ground Truth CSV file.
+
+The end goal is for the Submitted CSV File to closely relate to the Correct CSV File in order to detect the accuracy of your solution.  
+
+## Using the Referee (2020)
 
 ### Starting the Referee Queue
 ```bash

@@ -41,5 +41,12 @@ class Compare:
             'correct_num_frame': num_correct,
             'incorrect_num_frame': num_incorrect,
             'missing_num_frame': len(self.expected) - len(self.same_points),
-            'excess_num_frame': self.same_points.num_excess()
         }
+
+    def __str__(self):
+        score = self.score()
+        total = score['correct_num_frame'] + score['incorrect_num_frame'] + score['missing_num_frame']
+        percent_score = (score['correct_num_frame'] / total) * 100
+        return f'Number of Frames Correct: {score["correct_num_frame"]}\n'\
+               f'Number of Missing Frames: {score["missing_num_frame"]}\n' \
+               f'Percentage Score: {percent_score}\n'
