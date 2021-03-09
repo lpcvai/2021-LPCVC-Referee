@@ -1,6 +1,30 @@
 # LPCVC-Referee
 The evaluation systems (referee) for the 2020 and 2021 Low Power Computer Vision Challenge.
 
+# GitHub File Structure
+
+```.
+├─── bin 
+│    └── test-solution 
+│
+├─── lpcvc 
+│    ├─── LPCVC2020 
+│    │    ├─── ld_calc.py 
+│    │    ├─── lpcvc.py 
+│    │    ├─── scoring.py 
+│    │    └─── test_sub 
+│    └─── LPCVC2021 
+│         ├─── compare.py 
+│         ├─── data_set.py 
+│         ├─── read_solution.py 
+│         └─── README.md 
+├─── setup.py 
+└─── piFirewall.sh 
+```
+- bin includes scripts that come with package
+- lpcvc includes Python Code
+- setup.py installs package onto conda environment.
+
 ![Workflow Components and Layout](.github/pictures/workflow.jpg)
 
 ## Required Hardware and Software

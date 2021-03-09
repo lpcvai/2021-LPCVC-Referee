@@ -10,9 +10,9 @@ class DataSet:
 
     def get_item_from_threshold(self, frame_number, threshold, remember_pos=False):
         left, right = self.get_left_right_attribute(frame_number, remember_pos=remember_pos)
-        if left is not None and frame_number - left['Frame'] <= threshold:
+        if left is not None and frame_number - left['frame'] <= threshold:
             return left
-        elif right is not None and right['Frame'] - frame_number <= threshold:
+        elif right is not None and right['frame'] - frame_number <= threshold:
             self.items_pos += 1
             return right
         else:
@@ -21,7 +21,7 @@ class DataSet:
     def get_left_right_attribute(self, frame_number, remember_pos=False):
         left = None
         for right in self.items[self.items_pos if remember_pos else 0:]:
-            if frame_number < int(right['Frame']):
+            if frame_number < int(right['frame']):
                 return left, right
             left = right
             self.items_pos += 1 if remember_pos else 0
