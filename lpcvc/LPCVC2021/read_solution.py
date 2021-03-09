@@ -4,8 +4,8 @@ import csv
 def convert_frame_number_into_int(list_items):
     try:
         for i, item in enumerate(list_items):
-            if 'Frame' in item:
-                list_items[i]['Frame'] = int(item['Frame'])
+            if 'frame' in item:
+                list_items[i]['frame'] = int(item['frame'])
     except ValueError:
         print('Error: Value Error Inside Code')
         exit()

@@ -3,6 +3,30 @@ The evaluation systems (referee) for the 2020 and 2021 Low Power Computer Vision
 
 ![Workflow Components and Layout](.github/pictures/workflow.jpg)
 
+## GitHub File Structure
+
+```.
+├─── bin 
+│    └── test-solution 
+│
+├─── lpcvc 
+│    ├─── LPCVC2020 
+│    │    ├─── ld_calc.py 
+│    │    ├─── lpcvc.py 
+│    │    ├─── scoring.py 
+│    │    └─── test_sub 
+│    └─── LPCVC2021 
+│         ├─── compare.py 
+│         ├─── data_set.py 
+│         ├─── read_solution.py 
+│         └─── README.md 
+├─── setup.py 
+└─── piFirewall.sh 
+```
+- bin includes scripts that come with package
+- lpcvc includes Python Code
+- setup.py installs package onto conda environment.
+
 ## Required Hardware and Software
  - Yokogawa WT310 Power Meter (discontinued, substitutable with the [WT310E](https://www.electro-meters.com/yokogawa/yokogawa-power-meters/wt300e/) model)
  - Linux Server
@@ -58,7 +82,7 @@ Correct CSV File: The Ground Truth CSV file.
 
 The end goal is for the Submitted CSV File to closely relate to the Correct CSV File in order to detect the accuracy of your solution.  
 
-### How The Score is Determined
+#### [How The Score is Determined](lpcvc/LPCVC2021/README.md)
 
 ## Using the Referee (2020)
 

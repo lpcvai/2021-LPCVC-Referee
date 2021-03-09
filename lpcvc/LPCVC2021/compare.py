@@ -5,9 +5,9 @@ def calculate_correct(expected, actual):
     num_correct = 0
     num_attributes = 0
     for k, v in expected.items():
-        if k != 'Frame':
+        if k != 'frame':
             num_attributes += 1
-            if v == actual[k]:
+            if k in actual and v == actual[k]:
                 num_correct += 1
     return 0 if num_attributes == 0 else num_correct / num_attributes
 
@@ -24,7 +24,7 @@ class Compare:
     def compare(self):
         self.expected.items_pos = 0
         for i in self.actual:
-            item = self.expected.get_item_from_threshold(i['Frame'], self.threshold, remember_pos=True)
+            item = self.expected.get_item_from_threshold(i['frame'], self.threshold, remember_pos=True)
             self.same_points.add_item(item)
 
     def correct(self):
