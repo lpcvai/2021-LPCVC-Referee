@@ -1,7 +1,9 @@
 # LPCVC-Referee
 The evaluation systems (referee) for the 2020 and 2021 Low Power Computer Vision Challenge.
 
-# GitHub File Structure
+![Workflow Components and Layout](.github/pictures/workflow.jpg)
+
+## GitHub File Structure
 
 ```.
 ├─── bin 
@@ -24,8 +26,6 @@ The evaluation systems (referee) for the 2020 and 2021 Low Power Computer Vision
 - bin includes scripts that come with package
 - lpcvc includes Python Code
 - setup.py installs package onto conda environment.
-
-![Workflow Components and Layout](.github/pictures/workflow.jpg)
 
 ## Required Hardware and Software
  - Yokogawa WT310 Power Meter (discontinued, substitutable with the [WT310E](https://www.electro-meters.com/yokogawa/yokogawa-power-meters/wt300e/) model)
