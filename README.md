@@ -82,7 +82,7 @@ Correct CSV File: The Ground Truth CSV file.
 
 The end goal is for the Submitted CSV File to closely relate to the Correct CSV File in order to detect the accuracy of your solution.  
 
-### How The Score is Determined
+#### [How The Score is Determined](lpcvc/LPCVC2021/README.md)
 
 ## Using the Referee (2020)
 
