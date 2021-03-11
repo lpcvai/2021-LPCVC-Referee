@@ -4,8 +4,8 @@ with open('requirements.txt') as f:
     requirements = f.read().splitlines()
 
 setuptools.setup(
-    name='test_solution',
-    version="0.0.0",
+    name='cam2_referee',
+    version="0.0.1",
     install_requires=requirements,
     author="Matthew Wen",
     author_email="mattwen2018@gmail.com",
