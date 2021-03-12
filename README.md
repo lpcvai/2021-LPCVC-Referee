@@ -20,12 +20,15 @@ The evaluation systems (referee) for the 2020 and 2021 Low Power Computer Vision
 │         ├─── data_set.py 
 │         ├─── read_solution.py 
 │         └─── README.md 
+├─── scripts 
+│    ├─── install.sh 
+│    └─── pi_firewall.sh 
 ├─── setup.py 
-└─── piFirewall.sh 
 ```
 - bin includes scripts that come with package
 - lpcvc includes Python Code
 - setup.py installs package onto conda environment.
+- scripts directory is to set up the server environment.
 
 ## Required Hardware and Software
  - Yokogawa WT310 Power Meter (discontinued, substitutable with the [WT310E](https://www.electro-meters.com/yokogawa/yokogawa-power-meters/wt300e/) model)
