@@ -1,4 +1,4 @@
-name: Put Code From GitHub Repo into SHAY
+name: Update Referee System on Lab Computer Automatically
 on:
         push:
                 branches:

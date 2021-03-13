@@ -5,7 +5,7 @@ with open('requirements.txt') as f:
 
 setuptools.setup(
     name='cam2_referee',
-    version="0.0.1",
+    version="0.0.2",
     install_requires=requirements,
     author="Matthew Wen",
     author_email="mattwen2018@gmail.com",
