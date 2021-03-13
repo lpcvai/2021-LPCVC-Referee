@@ -1,0 +1,23 @@
+name: Put Code From GitHub Repo into SHAY
+on:
+        push:
+                branches:
+                        master
+
+
+jobs:
+        build:
+                name: Connect
+                runs-on: ubuntu-latest
+                steps:
+                        - name: executing remote ssh commands with password
+                          uses: appleboy/ssh-action@master
+                          with:
+                                  host: ${{ secrets.HOST }}
+                                  username: ${{ secrets.USERNAME }}
+                                  password: ${{secrets.PASSWORD }}
+                                  port: ${{ secrets.PORT }}
+                                  script: |
+                                          ./scripts/referee.sh
+
+
