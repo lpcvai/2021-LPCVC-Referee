@@ -20,12 +20,15 @@ The evaluation systems (referee) for the 2020 and 2021 Low Power Computer Vision
 │         ├─── data_set.py 
 │         ├─── read_solution.py 
 │         └─── README.md 
+├─── scripts 
+│    ├─── install.sh 
+│    └─── pi_firewall.sh 
 ├─── setup.py 
-└─── piFirewall.sh 
 ```
 - bin includes scripts that come with package
 - lpcvc includes Python Code
 - setup.py installs package onto conda environment.
+- scripts directory is to set up the server environment.
 
 ## Required Hardware and Software
  - Yokogawa WT310 Power Meter (discontinued, substitutable with the [WT310E](https://www.electro-meters.com/yokogawa/yokogawa-power-meters/wt300e/) model)
@@ -108,3 +111,23 @@ ps ax | grep python3   # find the queue process in this list
 kill 1000              # kill the task associated with the queue
 ```
 `kill` may take some time because it will wrap up the current submission that is being tested. __DO NOT__ use `kill -9` or the power meter may go into an indeterminate state and require a manual reset. This is a very hard thing to do right now.
+
+
+### GitHub Actions
+The team uses GitHub Actions for automatic deployment to Graduate Students Computer.
+This is done by creating a ssh channel through GitHub, which as a result, run a 
+command on the computer to automatically install. The username, password, and port is 
+encrypted, and no PR or Fork can trigger a run on the computer.
+
+##### Setting up GitHub Action
+![GitHub Action Location](.github/pictures/github_secret_key.png)
+This page is located under Settings, then Secrets.
+
+You click on New repository secret, and enter the HOST (url to computer), username, password, and port (usually 22).
+
+Keep in mind, that the repo have to be named 
+```
+~/referee
+```
+The name of directory must be named 'referee'.
+After that, the setup is complete.
