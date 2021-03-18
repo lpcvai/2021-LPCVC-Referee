@@ -125,9 +125,8 @@ This page is located under Settings, then Secrets.
 
 You click on New repository secret, and enter the HOST (url to computer), username, password, and port (usually 22).
 
-Keep in mind, that the repo have to be named 
+Keep in mind, there have to be a file called 
 ```
-~/referee
+~/scripts/referee.sh
 ```
-The name of directory must be named 'referee'.
-After that, the setup is complete.
+This script can be anything. For this purpose, it will run scripts inside the scripts directory in this repository.

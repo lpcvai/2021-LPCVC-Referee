@@ -15,10 +15,10 @@ def calculate_correct(expected, actual):
 class Compare:
 
     def __init__(self, correct: DataSet, submitted: DataSet, threshold):
-        self.expected: DataSet = correct
-        self.actual: DataSet = submitted
+        self.expected = correct
+        self.actual = submitted
         self.threshold = threshold
-        self.same_points: DataSet = DataSet()
+        self.same_points = DataSet()
         self.compare()
 
     def compare(self):
@@ -36,17 +36,13 @@ class Compare:
 
     def score(self):
         num_correct = self.correct()
-        num_incorrect = len(self.same_points) - num_correct
         return {
-            'correct_num_frame': num_correct,
-            'incorrect_num_frame': num_incorrect,
+            'total_score': num_correct,
+            'total_frames': len(self.same_points),
             'missing_num_frame': len(self.expected) - len(self.same_points),
         }
 
     def __str__(self):
         score = self.score()
-        total = score['correct_num_frame'] + score['incorrect_num_frame'] + score['missing_num_frame']
-        percent_score = (score['correct_num_frame'] / total) * 100
-        return f'Number of Frames Correct: {score["correct_num_frame"]}\n'\
-               f'Number of Missing Frames: {score["missing_num_frame"]}\n' \
-               f'Percentage Score: {percent_score}\n'
+        percent_score = (score['total_score'] / score['total_frames'])
+        return 'Score: {:.2}\n'.format(percent_score)

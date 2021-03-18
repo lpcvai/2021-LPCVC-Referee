@@ -1,0 +1,11 @@
+[Unit]
+Description=Backend for the lpcvc server
+
+[Service]
+EnvironmentFile=%h/env/referee.environment
+Type=simple
+StandardOutput=syslog
+StandardError=syslog
+ExecStart=/bin/bash -c "PATH=~/.local/bin:$PATH lpcvc"
+Restart=on-failure
+RestartSec=5
