@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+video_name=$1
+cd /home/dvideo/contestant-sol/solution
+python3 track.py --source ~/test_data/sources/"$video_name" --groundtruths ~/test_data/groundtruths/"$video_name".csv
+

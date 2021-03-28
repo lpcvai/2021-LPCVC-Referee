@@ -1,12 +1,13 @@
 #! /usr/bin/env python3
 
+import argparse
 import configparser
 import csv
 import os
 from pathlib import Path
 import psutil
 import requests
-from .scoring import calc_final_score
+from scoring import calc_final_score
 import signal
 from subprocess import Popen
 import sys
@@ -27,7 +28,7 @@ if os.path.isfile(settingsFile):
 
 SITE = my_env.get('LPCVC_SITE', os.path.expanduser('~/sites/lpcv.ai'))
 SITE_URL = my_env.get('LPCVC_SITE_URL', 'https://lpcv.ai')
-PI_USER = my_env.get('LPCVC_PI_USER', 'dvideo@referee.local')
+PI_USER = my_env.get('LPCVC_PI_USER', 'xiaohu@referee.local')
 METER_USER = my_env.get('LPCVC_METER_USER', 'user@meter.local')
 SHELL = my_env.get('LPCVC_SHELL', 'bash')
 if SHELL == 'bash':
@@ -152,7 +153,7 @@ def test_submission(submission, videos):
 class GracefulKiller:
     # https://stackoverflow.com/a/31464349
     kill_now = False
-    shutdown_withhold = False
+    shutdown_withold = False
 
     def __init__(self):
         signal.signal(signal.SIGINT, self.exit_gracefully)
@@ -160,7 +161,7 @@ class GracefulKiller:
 
     def exit_gracefully(self, signum, frame):
         self.kill_now = True
-        if not self.shutdown_withhold:
+        if not self.shutdown_withold:
             exit()
 
 
@@ -179,7 +180,7 @@ def start_queue(queue_path):
     while True:
         if killer.kill_now:
             exit()
-        killer.shutdown_withhold = True
+        killer.shutdown_withold = True
 
         # build queue
         queue = sorted(map(str, Path(queue_path).iterdir()), key=os.path.getctime, reverse=True)
@@ -202,7 +203,7 @@ def start_queue(queue_path):
             if killer.kill_now:
                 exit()
 
-        killer.shutdown_withhold = False
+        killer.shutdown_withold = False
         time.sleep(REFRESH_RATE)
 
 
@@ -244,3 +245,67 @@ def setup_pi():
     os.system('scp ./piFirewall.sh ' + PI_USER + ':' + PI_FIREWALL_SCRIPT)
     os.system('ssh ' + PI_USER + ' "chmod +x ' + TEST_SUB_SCRIPT + '"')
     os.system('ssh ' + PI_USER + ' "chmod +x ' + PI_FIREWALL_SCRIPT + '"')
+
+
+def main():
+    import argparse
+    from ld_calc import distance_calculator
+
+    queue_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'queue')
+
+    arg_handler = argparse.ArgumentParser(description='LPCVC UAV Track Submission Queue and Grader',
+                                          epilog="The suggested way to start the queue is by using the /etc/init.d script. "
+                                                 "Please use that instead to start and stop the queue in production. This "
+                                                 "script is primarily used as a library for that script and for testing.")
+    sub_arguments = arg_handler.add_subparsers()
+
+    tg_parser = sub_arguments.add_parser('',
+                                         help='default option for compatibility; test and grade a single submission')
+    tg_parser.set_defaults(func=test_and_grade, submission='test.pyz', videos=TEST_VIDEOS)
+    tg_parser.add_argument('submission', help="file name of the submission", nargs='?')
+    tg_parser.add_argument('videos', help="name of the video to test on", nargs='*')
+
+    r_parser = sub_arguments.add_parser('r', help='start the queue')
+    r_parser.set_defaults(func=start_queue, queuePath=queue_path, sleepTime=120)
+
+    r_parser.add_argument('queuePath', help="directory on the system to store the queue", nargs='?')
+    r_parser.add_argument('sleepTime', help="amount of time to sleep in between rounds of tests", nargs='?', type=float)
+
+    t_parser = sub_arguments.add_parser('t', help='test a single submission')
+    t_parser.set_defaults(func=test_submission, submission='test.pyz', videos=TEST_VIDEOS)
+    t_parser.add_argument('submission', help="file name of the submission", nargs='?')
+    t_parser.add_argument('videos', help="name of the video to test on", nargs='*')
+
+    g_parser = sub_arguments.add_parser('g', help='grade an answers.txt file')
+    g_parser.set_defaults(func=distance_calculator, aTxtName=SITE + "/results/answers.csv")
+    g_parser.add_argument('realATxtName', help="path of the real answers.txt file")
+    g_parser.add_argument('aTxtName', help="path of the submitted answers.txt file", nargs='?')
+
+    g_parser = sub_arguments.add_parser('G', help='grade using all files')
+    g_parser.set_defaults(func=calc_final_score, submissionFile=SITE + "/results/answers.txt",
+                          powerFile=SITE + "/results/power.csv")
+    g_parser.add_argument('groundTruthFile', help="path of the real answers.txt file")
+    g_parser.add_argument('submissionFile', help="path of the submitted answers.txt file", nargs='?')
+    g_parser.add_argument('powerFile', help="path of the power.csv file", nargs='?')
+    arguments = arg_handler.parse_args()
+
+    if not hasattr(arguments, 'func'):
+        # parser.print_help()
+        # exit()
+        arguments.func = test_and_grade
+        arguments.submission = 'test.pyz'
+        arguments.videos = TEST_VIDEOS
+
+    if arguments.func in (start_queue, test_submission) and check_if_process_running(sys.argv[0].split('/')[-1]):
+        print("A queue process is already running. Please wait for it to finish.")
+        exit(1)
+
+    func = arguments.func
+    output = func(**vars(arguments))
+    del arguments.func
+    if output is not None:
+        print("Operation returned " + str(output))
+
+
+if __name__ == "__main__":
+    main()

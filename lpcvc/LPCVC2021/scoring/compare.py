@@ -34,7 +34,7 @@ class Compare:
                 num_correct += calculate_correct(e, a)
         return num_correct
 
-    def score(self):
+    def description_score(self):
         num_correct = self.correct()
         return {
             'total_score': num_correct,
@@ -42,7 +42,11 @@ class Compare:
             'missing_num_frame': len(self.expected) - len(self.same_points),
         }
 
+    @property
+    def score(self):
+        score = self.description_score()
+        total_frames = score['total_frames']
+        return score['total_score'] / total_frames if total_frames > 0 else 0
+
     def __str__(self):
-        score = self.score()
-        percent_score = (score['total_score'] / score['total_frames'])
-        return 'Score: {:.2}\n'.format(percent_score)
+        return 'Score: {:.2}\n'.format(self.score)
