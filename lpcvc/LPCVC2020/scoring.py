@@ -1,5 +1,5 @@
 import sys
-from ld_calc import distance_calculator
+from .ld_calc import distance_calculator
 
 MAX_POWER = 6.28232727
 MIN_POWER = 0.000544746733

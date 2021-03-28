@@ -7,7 +7,7 @@ import os
 from pathlib import Path
 import psutil
 import requests
-from scoring import calc_final_score
+from .scoring import calc_final_score
 import signal
 from subprocess import Popen
 import sys

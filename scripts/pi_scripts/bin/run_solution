@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+solution_directory=$1
+video_name=$2
+base_name=${video_name%.*}
+cd "$solution_directory" || exit
+python3 track.py --source ~/test_data/sources/"$video_name" --groundtruths ~/test_data/groundtruths/"$base_name".csv
+

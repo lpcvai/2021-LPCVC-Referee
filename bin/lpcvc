@@ -1,0 +1,58 @@
+#!/usr/bin/env -u python3
+import os
+from lpcvc.LPCVC2021 import test_and_grade, start_queue, test_submission, SITE
+from lpcvc.LPCVC2020.ld_calc import distance_calculator
+from lpcvc.LPCVC2020.scoring import calc_final_score
+import argparse
+
+TEST_VIDEOS = os.getenv('LPCVC_TEST_VIDEOS', '').split()
+
+working_directory = os.getenv("WORKING_DIRECTORY", "./")
+queue_path = os.path.join(working_directory, 'queue')
+arg_handler = argparse.ArgumentParser(description='LPCVC UAV Track Submission Queue and Grader',
+                                      epilog="The suggested way to start the lpcvc_queue is by using the /etc/init.d script. "
+                                             "Please use that instead to start and stop the lpcvc_queue in production. This "
+                                             "script is primarily used as a library for that script and for testing.")
+sub_arguments = arg_handler.add_subparsers()
+
+tg_parser = sub_arguments.add_parser('',
+                                     help='default option for compatibility; test and grade a single submission')
+tg_parser.set_defaults(func=test_and_grade, submission='test.pyz', videos=TEST_VIDEOS)
+tg_parser.add_argument('submission', help="file name of the submission", nargs='?')
+tg_parser.add_argument('videos', help="name of the video to test on", nargs='*')
+
+run_queue_parser = sub_arguments.add_parser('r', help='start the lpcvc_queue')
+run_queue_parser.set_defaults(func=start_queue, queue_path=queue_path, sleep_time=None)
+
+run_queue_parser.add_argument('queue_path', help="directory on the system to store the lpcvc_queue", nargs='?')
+run_queue_parser.add_argument('sleep_time', help="amount of time to sleep in between rounds of tests", nargs='?',
+                              type=float)
+
+test_parser = sub_arguments.add_parser('t', help='test a single submission')
+test_parser.set_defaults(func=test_submission, submission='test.pyz', videos=TEST_VIDEOS)
+test_parser.add_argument('submission', help="file name of the submission", nargs='?')
+test_parser.add_argument('videos', help="name of the video to test on", nargs='*')
+
+grade_parser = sub_arguments.add_parser('g', help='grade an answers.txt file')
+grade_parser.set_defaults(func=distance_calculator, actual_text_file=SITE + "/results/answers.csv")
+grade_parser.add_argument('real_text_file', help="path of the real answers.txt file")
+grade_parser.add_argument('actual_text_file', help="path of the submitted answers.txt file", nargs='?')
+
+grade_parser = sub_arguments.add_parser('G', help='grade using all files')
+grade_parser.set_defaults(func=calc_final_score, submission_file=SITE + "/results/answers.txt",
+                          power_file=SITE + "/results/power.csv")
+grade_parser.add_argument('ground_truth_file', help="path of the real answers.txt file")
+grade_parser.add_argument('submission_file', help="path of the submitted answers.txt file", nargs='?')
+grade_parser.add_argument('power_file', help="path of the power.csv file", nargs='?')
+arguments = arg_handler.parse_args()
+
+if not hasattr(arguments, 'func'):
+    arguments.func = test_and_grade
+    arguments.submission = 'test.pyz'
+    arguments.videos = TEST_VIDEOS
+
+output_func = arguments.func
+del arguments.func
+output = output_func(**vars(arguments))
+if output is not None:
+    print("Operation returned " + str(output))
