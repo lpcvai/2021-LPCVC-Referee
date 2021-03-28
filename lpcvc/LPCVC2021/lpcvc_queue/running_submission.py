@@ -59,7 +59,7 @@ def remove_output():
 
 def run_on_video(video):
     remove_output()
-    run_command = "run_solution {}".format(video)
+    run_command = "run_solution {}/solution {}".format(PI_TEST_DIR, video)
     if get_pi_command_from_meter(timeout=300, commands=run_command, use_p_open=True) != 0:
         print("FATAL: Cannot start power meter", file=sys.stderr)
         exit(1)

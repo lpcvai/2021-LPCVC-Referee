@@ -33,7 +33,7 @@ LPCVC_PI_USER="username@[local ipv4 address]"
 LPCVC_PI_PASSWORD="Password to Raspberry Pi"
 LPCVC_PI_TEST_DIR="Directory to Run Contestant Solution"
 LPCVC_SITE="Location of 'website_directory'. Required for 'results' directory"
-METER_CMD="Python Command with {} as parameters to run script via Meter to Raspberry Pi"
+METER_CMD="Python Command with {} as parameters to run script from Meter to Raspberry Pi"
 METER_CSV="Output from the meter."
 ```
 All environment variables are used inside lpcvc/LPCVC2021/lpcvc_queue directory. I recommend looking through there, 
@@ -138,7 +138,7 @@ systemctl status lpcvc.service --user
 ### Manually Enqueuing Submissions
 
 ```bash
-touch lpcvc_queue/test.pyz
+touch queue/test.pyz
 ```
 Make sure inside the "LPCVC_SUBMISSION_DIR", that there is a file called test.pyz that meets the requirements of running
 the solution.

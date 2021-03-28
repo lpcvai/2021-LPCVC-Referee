@@ -3,8 +3,7 @@ import time
 
 import requests
 
-from lpcvc.LPCVC2021 import DataSet
-from lpcvc.LPCVC2021.scoring import Compare
+from lpcvc.LPCVC2021 import DataSet, Compare
 
 SITE = os.getenv('LPCVC_SITE', os.path.expanduser('~/sites/lpcv.ai'))
 SITE_URL = os.getenv('LPCVC_SITE_URL', 'https://lpcv.ai')
