@@ -112,7 +112,7 @@ program from any directory without the need to pinpoint the location of the scri
 test-solution [-t Threshold] [Submitted CSV file] [Correct CSV File]
 ```
 
-Threshold: Integer that correspons to the number of frames away the submitted input answer can be from the correct input
+Threshold: Integer that corresponds to the number of frames away the submitted input answer can be from the correct input
 when tracking when a ball is caught. This is an optional argument, and the default is 10. Submitted CSV File: Result CSV
 file from submission. Correct CSV File: The Ground Truth CSV file.
 
