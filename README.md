@@ -163,7 +163,6 @@ This page is located under Settings, then Secrets.
 
 You click on New repository secret, and enter the HOST (url to computer), username, password, and port (usually 22).
 
-Keep in mind, there have to be a file called
 
 ```
 ~/scripts/referee.sh
