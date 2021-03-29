@@ -47,7 +47,7 @@ def append_video_score(video, score_cvs):
         score = get_video_score(video)
     energy -= duration * MIN_POWER
     final_score = score / energy if energy > 0 else 0
-    score_cvs.writerow([video, round(score, 2), energy, duration, round(final_score, 5)])
+    score_cvs.writerow([video, round(score, 2), energy, "None", duration, round(final_score, 5)])
 
 
 def report_score(submission):
