@@ -35,7 +35,6 @@ def get_video_score(video):
     base_name = os.path.splitext(video)[0]
     submitted = DataSet(file_name=SITE + "/results/{}_out.csv".format(base_name))
     correct = DataSet(file_name=TEST_DATA_DIR + "/correct/{}.csv".format(base_name))
-    print(TEST_DATA_DIR + "/correct/{}.csv")
     return Compare(correct, submitted, 10).score
 
 
