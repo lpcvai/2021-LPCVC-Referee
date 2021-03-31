@@ -1,13 +1,13 @@
 from .data_set import DataSet
 
 
-def calculate_correct(expected, actual):
+def calculate_correct(correct, submitted):
     num_correct = 0
     num_attributes = 0
-    for k, v in expected.items():
+    for k, v in correct.items():
         if k != 'frame':
             num_attributes += 1
-            if k in actual and v == actual[k]:
+            if k in submitted and v == submitted[k]:
                 num_correct += 1
     return 0 if num_attributes == 0 else num_correct / num_attributes
 
@@ -15,31 +15,31 @@ def calculate_correct(expected, actual):
 class Compare:
 
     def __init__(self, correct: DataSet, submitted: DataSet, threshold):
-        self.expected = correct
-        self.actual = submitted
+        self.correct = correct
+        self.submitted = submitted
         self.threshold = threshold
         self.same_points = DataSet()
         self.compare()
 
     def compare(self):
-        self.expected.items_pos = 0
-        for i in self.actual:
-            item = self.expected.get_item_from_threshold(i['frame'], self.threshold, remember_pos=True)
+        self.correct.items_pos = 0
+        for i in self.submitted:
+            item = self.correct.get_item_from_threshold(i['frame'], self.threshold, remember_pos=True)
             self.same_points.add_item(item)
 
-    def correct(self):
+    def num_correct(self):
         num_correct = 0
-        for e, a in zip(self.actual, self.same_points):
-            if None not in [e, a]:
-                num_correct += calculate_correct(e, a)
+        for c, s in zip(self.same_points, self.submitted):
+            if None not in [c, s]:
+                num_correct += calculate_correct(c, s)
         return num_correct
 
     def description_score(self):
-        num_correct = self.correct()
+        num_correct = self.num_correct()
         return {
             'total_score': num_correct,
             'total_frames': len(self.same_points),
-            'missing_num_frame': len(self.expected) - len(self.same_points),
+            'missing_num_frame': len(self.correct) - len(self.same_points),
         }
 
     @property
