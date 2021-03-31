@@ -49,8 +49,7 @@ in addition, posting issues if you notice a major flaw.
     - [Yokogawa YKMUSB USB Driver](https://tmi.yokogawa.com/us/library/documents-downloads/software/usb-driver/)
     - [Microsoft Visual Studio](https://visualstudio.microsoft.com/downloads/)
     - [Python 3](https://www.python.org/downloads/windows/)
-    -
-  OpenSSH ([Windows 10](https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse)
+    - OpenSSH ([Windows 10](https://docs.microsoft.com/en-us/windows-server/administration/openssh/openssh_install_firstuse)
   , [before Windows 10](https://github.com/PowerShell/openssh-portable/releases))
     - [HELPS WT310 Controlling Program](https://github.com/anivegesana/WT310)
 - Raspberry Pi 
