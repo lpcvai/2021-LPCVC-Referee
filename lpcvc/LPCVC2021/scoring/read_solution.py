@@ -16,7 +16,7 @@ def get_dict_from_solution(file_name):
     try:
         fp = open(file_name)
         csv_read = csv.DictReader(fp)
-        response = [{k.lower(): v for k, v in i.items()} for i in csv_read]
+        response = [{k.lower(): v for k, v in i.items() if k is not None} for i in csv_read]
         convert_frame_number_into_int(response)
         fp.close()
     except FileNotFoundError:
