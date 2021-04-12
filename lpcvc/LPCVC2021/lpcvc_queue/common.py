@@ -35,8 +35,8 @@ def pi_get_submission(submission_location, submission_destination):
 
 def pi_run_command(command, arguments=None, sudo=False, use_p_open=False):
     if use_p_open:
-        p_open_args = arguments if arguments is not None else []
-        p_open_args += ['ssh', PI_USER, command]
+        p_open_args = ['ssh', PI_USER, command]
+        p_open_args += arguments if arguments is not None else []
         return Popen(p_open_args).wait()
     if sudo:
         os.system('ssh ' + PI_USER + ' -tt "echo {} | sudo -S {}"'.format(PI_PASSWORD, command))

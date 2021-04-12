@@ -24,7 +24,7 @@ def install_dependencies():
     command = """
     cd {}
     """.format(os.path.join(PI_TEST_DIR, 'solution'))
-    response = pi_run_command(SHELL, arguments=['-c', command], use_p_open=True)
+    response = pi_run_command(SHELL, arguments=[command], use_p_open=True)
     pi_set_allow_firewall(False)
     return response
 
