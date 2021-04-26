@@ -25,6 +25,7 @@ def run_pi_script(name, arguments):
 
 def pi_set_allow_firewall(is_allow):
     parameter = "allow" if is_allow else "block"
+    print("{} Command".format(parameter))
     pi_run_command("pi_firewall {} {}".format(parameter, PI_PASSWORD), False)
 
 
