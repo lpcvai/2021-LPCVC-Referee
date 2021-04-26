@@ -25,6 +25,7 @@ def install_dependencies():
     cd {} &&
     pip3 install -r requirements.txt
     """.format(os.path.join(PI_TEST_DIR, 'solution'))
+    print(command)
     response = pi_run_command(SHELL, arguments=[command], use_p_open=True)
     pi_set_allow_firewall(False)
     return response
