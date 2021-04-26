@@ -21,14 +21,15 @@ def create_test_directory():
 
 def install_dependencies():
     pi_set_allow_firewall(True)
+    # Ignored Because there is not requirements.txt file inside sample solution
     command = """
     cd {} &&
     pip3 install -r requirements.txt &&
     exit
     """.format(os.path.join(PI_TEST_DIR, 'solution'))
-    response = pi_run_command(SHELL, arguments=[command], use_p_open=False)
+    # response = pi_run_command(SHELL, arguments=[command], use_p_open=True)
     pi_set_allow_firewall(False)
-    return response
+    return True
 
 
 def put_submission_in_test_directory(submission):
