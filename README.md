@@ -120,7 +120,7 @@ your solution.
 
 #### [How The Score is Determined](lpcvc/LPCVC2021/scoring/README.md)
 
-## Using the Referee (2020)
+<!-- ## Using the Referee (2020)
 
 ### Starting the Referee Queue
 
@@ -167,4 +167,4 @@ You click on New repository secret, and enter the HOST (url to computer), userna
 ~/scripts/referee.sh
 ```
 
-This script can be anything. For this purpose, it will run scripts inside the scripts directory in this repository.
+This script can be anything. For this purpose, it will run scripts inside the scripts directory in this repository. -->
