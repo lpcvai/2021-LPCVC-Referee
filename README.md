@@ -4,7 +4,7 @@ The evaluation systems (referee) for the 2020 and 2021 Low Power Computer Vision
 
 ![Workflow Components and Layout](.github/pictures/workflow.jpg)
 
-## Server File Structure
+<!-- ## Server File Structure
 
 ```.
 Home Directory
@@ -88,7 +88,7 @@ Create a virtual environment for the solutions with the `--site-packages` option
 of the submissions. Update the `PI_TEST_DIR` variable of the lpcvc.py file in this repository. Create yet another SSH
 key for the Linux Server using the ssh-keygen utility. Add all three keys to the authorized_keys file in the ~/.ssh
 folder using the ssh-add utility.
-__DO NOT__ add the Pi's key to the other two machines. Doing so is a security risk.
+__DO NOT__ add the Pi's key to the other two machines. Doing so is a security risk. -->
 
 ## Using the Referee (2021)
 
