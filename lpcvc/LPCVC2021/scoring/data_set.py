@@ -35,6 +35,10 @@ class DataSet:
     def __len__(self):
         return self.items_len
 
+    def get_itemLength(self):
+        # Num of attributes
+        return len(self.items[0]) - 1
+
     def num_excess(self):
         return len(self.items) - self.items_len
 
