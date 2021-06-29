@@ -74,6 +74,8 @@ class Compare:
         if len(self.prRcList) <= 1:
             return 0
 
+        #added minor bug fix
+        self.prRcList.insert(0, [self.prRcList[0][0], 0.0])
         curPrecision = self.prRcList[0][0]
         curRecall = self.prRcList[0][1]
 
@@ -88,7 +90,7 @@ class Compare:
 
     def description_score(self):
         num_correct = self.num_correct()
-         # self.fixprRcList()
+        # self.fixprRcList()
         self.interPolateAP()
         score = self.calcmAP()
 
