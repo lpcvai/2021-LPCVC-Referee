@@ -96,12 +96,18 @@ __DO NOT__ add the Pi's key to the other two machines. Doing so is a security ri
 
 You need to clone this repository, and then run the following command.
 
+<!--
 ```bash
 python3 setup.py install --user
 
 # To Install Queue
 cd [source code]/scripts/server_scripts
 ./service.sh
+```
+-->
+
+```bash
+python3 setup.py install
 ```
 
 This will make the script 'test-solution' available to you in any working directory. As a result, you can run the
