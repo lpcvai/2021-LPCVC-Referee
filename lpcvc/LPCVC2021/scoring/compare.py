@@ -106,7 +106,7 @@ class Compare:
     @property
     def score(self):
         score = self.description_score()
-        return score['precision & recall']
+        return score['score']
 
     def __str__(self):
         return 'Score: {}\n'.format(str(self.score))
