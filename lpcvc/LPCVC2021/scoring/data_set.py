@@ -25,7 +25,7 @@ class DataSet:
                 return left, right
             left = right
             self.items_pos += 1 if remember_pos else 0
-        self.items_pos = self.items_pos % len(self.items)
+        #self.items_pos = self.items_pos % len(self.items)
         return left, None
 
     def __iter__(self):
