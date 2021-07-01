@@ -74,23 +74,24 @@ class Compare:
         if len(self.prRcList) <= 1:
             return 0
 
-        #added minor bug fix
-        self.prRcList.insert(0, [self.prRcList[0][0], 0.0])
-        curPrecision = self.prRcList[0][0]
-        curRecall = self.prRcList[0][1]
+        # added minor bug fix
+        # self.prRcList.insert(0, [self.prRcList[0][0], 0.0])
+        i = len(self.prRcList) - 1
+        curPrecision = self.prRcList[i][0]
+        curRecall = self.prRcList[i][1]
 
-        for i in range(1, len(self.prRcList)):
+        while i >= 0:
             if self.prRcList[i][0] != curPrecision:
-                score += curPrecision * (self.prRcList[i][1] - curRecall)
+                score += curPrecision * (curRecall - self.prRcList[i][1])
                 curRecall = self.prRcList[i][1]
                 curPrecision = self.prRcList[i][0]
-        if curRecall != self.prRcList[len(self.prRcList) - 1][1]:
-            score += curPrecision * (self.prRcList[len(self.prRcList) - 1][1] - curRecall)
+            i -= 1
+        score += curPrecision * curRecall
         return score
 
     def description_score(self):
         num_correct = self.num_correct()
-        # self.fixprRcList()
+        self.fixprRcList()
         self.interPolateAP()
         score = self.calcmAP()
 
@@ -105,7 +106,7 @@ class Compare:
     @property
     def score(self):
         score = self.description_score()
-        return score['score']
+        return score['precision & recall']
 
     def __str__(self):
         return 'Score: {}\n'.format(str(self.score))
