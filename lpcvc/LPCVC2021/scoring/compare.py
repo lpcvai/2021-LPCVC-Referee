@@ -4,12 +4,16 @@ from .data_set import DataSet
 def calculate_correct(correct, submitted):
     num_correct = 0
     num_attributes = 0
+    correctList = []
     for k, v in correct.items():
         if k != 'frame':
             num_attributes += 1
             if k in submitted and v == submitted[k]:
                 num_correct += 1
-    return (0, 0) if num_attributes == 0 else (num_correct, num_attributes - num_correct)
+                correctList.append(1)
+            else:
+                correctList.append(-1)
+    return None if num_attributes == 0 else correctList
 
 
 class Compare:
@@ -36,14 +40,19 @@ class Compare:
         num_correct = 0
         for c, s in zip(self.same_points, self.submitted):
             if None not in [c, s]:
-                correct, incorrect = calculate_correct(c, s)
-                self.currCorrect += correct
-                self.currIncorrect += incorrect
+                tempList = calculate_correct(c, s)
+                for i in tempList:
+                    if i == 1:
+                        self.currCorrect += 1
+                    else:
+                        self.currIncorrect += 1
+                    self.prRcList.append([(self.currCorrect / (self.currCorrect + self.currIncorrect)),
+                                          (self.currCorrect / self.totalAttributes)])
             else:
-                self.currIncorrect += self.numAttributes
-
-            self.prRcList.append([(self.currCorrect / (self.currCorrect + self.currIncorrect)),
-                                  (self.currCorrect / self.totalAttributes)])
+                for i in range(self.numAttributes):
+                    self.currIncorrect += 1
+                    self.prRcList.append([(self.currCorrect / (self.currCorrect + self.currIncorrect)),
+                                          (self.currCorrect / self.totalAttributes)])
         return num_correct
 
     def interPolateAP(self):
@@ -91,7 +100,7 @@ class Compare:
 
     def description_score(self):
         num_correct = self.num_correct()
-        self.fixprRcList()
+        #self.fixprRcList()
         self.interPolateAP()
         score = self.calcmAP()
 
@@ -106,7 +115,7 @@ class Compare:
     @property
     def score(self):
         score = self.description_score()
-        return score['score']
+        return score['precision & recall']
 
     def __str__(self):
         return 'Score: {}\n'.format(str(self.score))
