@@ -55,7 +55,7 @@ def setup_submission(submission):
 
 
 def remove_output():
-    pi_run_command("rm -rf {}/solution/outputs".format(PI_TEST_DIR))
+    pi_run_command("rm -rf {}/outputs".format(PI_TEST_DIR))
 
 
 def run_on_video(video):
@@ -66,7 +66,7 @@ def run_on_video(video):
         exit(1)
     else:
         base_name = os.path.splitext(video)[0]
-        program_output = "{}/solution/outputs/{}_out.csv".format(PI_TEST_DIR, base_name)
+        program_output = "{}/outputs/{}_out.csv".format(PI_TEST_DIR, base_name)
         destination = SITE + "/results/"
         get_file_from_pi(program_output, destination)
         get_power_results()
