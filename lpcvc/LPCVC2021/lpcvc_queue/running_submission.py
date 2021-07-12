@@ -55,7 +55,7 @@ def setup_submission(submission):
 
 
 def remove_output():
-    pi_run_command("rm -rf {}/outputs".format(PI_TEST_DIR))
+    pi_run_command("rm -rf {}/outputs && mkdir -p {}/outputs".format(PI_TEST_DIR, PI_TEST_DIR))
 
 
 def run_on_video(video):
