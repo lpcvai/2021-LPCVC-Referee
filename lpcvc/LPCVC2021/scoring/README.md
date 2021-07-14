@@ -37,5 +37,15 @@ After completing the mapping, it will look through data points from correct, and
 if the solution predicted who was carrying which ball correctly. For each frame, it will represent a score from 0 to 1
 based off of how correct each frame is. 
 
+# Scoring Method
+
+As some general definitions, the grading script defines true positive (TP) as a correct detection, false positive (FP) as an extra detection, and false negative (FN) as a missed detection. The grading system uses a variation of the F1 scoring method, which normally takes the harmonic mean of the precision and recall values:
+
+<img src=../../../.github/pictures/F1_scoring.PNG width=70%>
+
+Since precision is represented by TP/(TP + FP), and the recall is represented by TP/(TP + FN), the simplified version of the equation above is TP/(TP + 0.5*(FP + FN)). This is the normal F1 scoring method. However, our true positives are not uniform. This means that the true positive only counts as a correct detection, but there are other attributes within the detection (how many of the ball/person pairs within the frames are detected correctly). Thus, we have a frame score for each true positive, which is calculated by dividing the number of correct ball/person values over the total color change values. The grading script then takes the summation of all frame scores, and sets it as the numerator of the F1 scoring method. Since true positive represents the correct detections, and frame score gives the accuracy within the correct detection, this gives a better evaluation of the score for the entire submission. The final score is calculated as the accuracy value given by F1 divided by the energy from the power meter.
+
+<img src=../../../.github/pictures/Modified_F1_Scoring.PNG width=65%>
+
 # Final Score
-Final Score = [(Summation of Score Per Frame From Enumerating Result and Solution) / (Number of Frames from Correct Data Set)] * 100
+Final Score = [(Accuracy from F1) / (Energy)] * 100
