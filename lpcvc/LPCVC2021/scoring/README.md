@@ -48,4 +48,4 @@ Since precision is represented by TP/(TP + FP), and the recall is represented by
 <img src=../../../.github/pictures/Modified_F1_Scoring.PNG width=65%>
 
 # Final Score
-Final Score = [(Accuracy from F1) / (Energy)] * 100
+Final Score = (Accuracy from F1) / (Energy)
