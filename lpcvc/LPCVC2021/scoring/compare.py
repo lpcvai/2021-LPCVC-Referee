@@ -37,16 +37,20 @@ class Compare:
     def description_score(self):
         num_correct = self.num_correct()
         return {
-            'total_score': num_correct,
-            'total_frames': len(self.same_points),
-            'missing_num_frame': len(self.correct) - len(self.same_points),
+            'sum_frame_score': num_correct,
+            'TP_frames': len(self.same_points),
+            'FP_frames': len(self.submitted) - len(self.same_points),
+            'FN_frames': len(self.correct) - len(self.same_points)
         }
 
     @property
     def score(self):
         score = self.description_score()
-        total_frames = score['total_frames']
-        return score['total_score'] / total_frames if total_frames > 0 else 0
+        sum_frame_score = score['sum_frame_score']
+        TP = score['TP_frames']
+        FP = score['FP_frames']
+        FN = score['FN_frames']
+        return sum_frame_score / (TP + 0.5 * (FP + FN))
 
     def __str__(self):
         return 'Score: {:.2}\n'.format(self.score)
