@@ -19,13 +19,14 @@ def create_test_directory():
     return pi_run_command(command, use_p_open=True)
 
 
-def install_dependencies():
+def install_dependencies(env_name):
     pi_set_allow_firewall(True)
     command = """
     cd {} && 
-    pip3 install -r requirements.txt &&
+    echo {} > ../env_name.txt &&
+    conda env create -f environment.yml --name {} &&
     exit
-    """.format(os.path.join(PI_TEST_DIR, 'solution'))
+    """.format(os.path.join(PI_TEST_DIR, 'solution'), env_name, env_name)
     response = pi_run_command(SHELL, arguments=[command], use_p_open=True)
     pi_set_allow_firewall(False)
     return response
@@ -47,7 +48,7 @@ def setup_submission(submission):
     if pi_run_command("unzip", arguments=unzip_arguments, use_p_open=True) != 0:
         print("ERROR: Cannot unzip the solution", file=sys.stderr)
 
-    if install_dependencies() != 0:
+    if install_dependencies(submission[:-4]) != 0:
         print("ERROR: Cannot install the requirements", file=sys.stderr)
         return False
 
@@ -60,8 +61,8 @@ def remove_output():
 
 def run_on_video(video):
     remove_output()
-    run_command = "run_solution {}/solution {}".format(PI_TEST_DIR, video)
-    if get_pi_command_from_meter(timeout=14400, commands=run_command, use_p_open=True) != 0:
+    run_command = "conda activate $(cat {}/env_name.txt) && run_solution {}/solution {}".format(PI_TEST_DIR, PI_TEST_DIR, video)
+    if get_pi_command_from_meter(timeout=300, commands=run_command, use_p_open=True) != 0:
         print("FATAL: Cannot start power meter", file=sys.stderr)
         exit(1)
     else:
