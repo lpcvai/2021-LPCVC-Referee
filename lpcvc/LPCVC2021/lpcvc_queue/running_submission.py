@@ -55,18 +55,18 @@ def setup_submission(submission):
 
 
 def remove_output():
-    pi_run_command("rm -rf {}/solution/outputs".format(PI_TEST_DIR))
+    pi_run_command("rm -rf {}/outputs && mkdir -p {}/outputs".format(PI_TEST_DIR, PI_TEST_DIR))
 
 
 def run_on_video(video):
     remove_output()
     run_command = "run_solution {}/solution {}".format(PI_TEST_DIR, video)
-    if get_pi_command_from_meter(timeout=300, commands=run_command, use_p_open=True) != 0:
+    if get_pi_command_from_meter(timeout=14400, commands=run_command, use_p_open=True) != 0:
         print("FATAL: Cannot start power meter", file=sys.stderr)
         exit(1)
     else:
         base_name = os.path.splitext(video)[0]
-        program_output = "{}/solution/outputs/{}_out.csv".format(PI_TEST_DIR, base_name)
+        program_output = "{}/outputs/{}_out.csv".format(PI_TEST_DIR, base_name)
         destination = SITE + "/results/"
         get_file_from_pi(program_output, destination)
         get_power_results()
