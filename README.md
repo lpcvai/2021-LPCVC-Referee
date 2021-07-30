@@ -4,7 +4,7 @@ The evaluation systems (referee) for the 2020 and 2021 Low Power Computer Vision
 
 ![Workflow Components and Layout](.github/pictures/workflow.jpg)
 
-## Server File Structure
+<!-- ## Server File Structure
 
 ```.
 Home Directory
@@ -88,7 +88,7 @@ Create a virtual environment for the solutions with the `--site-packages` option
 of the submissions. Update the `PI_TEST_DIR` variable of the lpcvc.py file in this repository. Create yet another SSH
 key for the Linux Server using the ssh-keygen utility. Add all three keys to the authorized_keys file in the ~/.ssh
 folder using the ssh-add utility.
-__DO NOT__ add the Pi's key to the other two machines. Doing so is a security risk.
+__DO NOT__ add the Pi's key to the other two machines. Doing so is a security risk. -->
 
 ## Using the Referee (2021)
 
@@ -96,12 +96,18 @@ __DO NOT__ add the Pi's key to the other two machines. Doing so is a security ri
 
 You need to clone this repository, and then run the following command.
 
+<!--
 ```bash
 python3 setup.py install --user
 
 # To Install Queue
 cd [source code]/scripts/server_scripts
 ./service.sh
+```
+-->
+
+```bash
+python3 setup.py install
 ```
 
 This will make the script 'test-solution' available to you in any working directory. As a result, you can run the
@@ -120,7 +126,7 @@ your solution.
 
 #### [How The Score is Determined](lpcvc/LPCVC2021/scoring/README.md)
 
-## Using the Referee (2020)
+<!-- ## Using the Referee (2020)
 
 ### Starting the Referee Queue
 
@@ -167,4 +173,4 @@ You click on New repository secret, and enter the HOST (url to computer), userna
 ~/scripts/referee.sh
 ```
 
-This script can be anything. For this purpose, it will run scripts inside the scripts directory in this repository.
+This script can be anything. For this purpose, it will run scripts inside the scripts directory in this repository. -->
