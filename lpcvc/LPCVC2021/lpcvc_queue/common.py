@@ -45,7 +45,7 @@ def pi_run_command(command, arguments=None, sudo=False, use_p_open=False):
     return 0
 
 
-def get_pi_command_from_meter(timeout=4500, name=None, arguments=None, commands=None, use_p_open=False):
+def get_pi_command_from_meter(timeout=3600, name=None, arguments=None, commands=None, use_p_open=False):
     if use_p_open:
         return Popen(['stdbuf', '-o0', '-e0', "ssh", METER_USER,
                       get_pi_command_from_meter(timeout=timeout, commands=commands)]).wait()
