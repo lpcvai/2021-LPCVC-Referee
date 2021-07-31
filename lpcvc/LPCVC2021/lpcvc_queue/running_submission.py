@@ -69,6 +69,8 @@ def run_on_video(video):
         base_name = os.path.splitext(video)[0]
         program_output = "{}/outputs/{}_out.csv".format(PI_TEST_DIR, base_name)
         destination = SITE + "/results/"
+        old_file = destination + "{}_out.csv".format(base_name)
+        os.system("rm " + old_file)
         get_file_from_pi(program_output, destination)
         get_power_results()
 
