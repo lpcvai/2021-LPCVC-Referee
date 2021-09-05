@@ -80,7 +80,8 @@ def write_avg_score(submissionName):
     print(submissionName)
     with open(f"{SUBMISSION_DIR}/scores.csv") as score_table:
         # print('{},{},{},{},{}'.format(datetime.now(), submissionName, avg_accuracy, avg_energy, avg_perfomance_score))
-        score_table.write('{},{},{},{},{}'.format(datetime.now(), submissionName, avg_accuracy, avg_energy, avg_perfomance_score))
+        # grading_time,submission_name,avg_accuracy,avg_energy,avg_score
+        score_table.write('\n{},{},{},{},{}'.format(datetime.now(), submissionName, avg_accuracy, avg_energy, avg_perfomance_score))
 
 
     
