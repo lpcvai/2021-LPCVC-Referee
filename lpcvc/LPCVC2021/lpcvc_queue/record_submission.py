@@ -79,8 +79,8 @@ def write_avg_score(submissionName):
         avg_perfomance_score /= cnt
     print(submissionName)
     with open(f"{SUBMISSION_DIR}/scores.csv") as score_table:
-        print('{},{},{},{},{}'.format(datetime.now(), submissionName, avg_accuracy, avg_energy, avg_perfomance_score))
-        # score_table.write('{},{},{},{},{}'.format(datetime.now(), submissionName, avg_accuracy, avg_energy, avg_perfomance_score))
+        # print('{},{},{},{},{}'.format(datetime.now(), submissionName, avg_accuracy, avg_energy, avg_perfomance_score))
+        score_table.write('{},{},{},{},{}'.format(datetime.now(), submissionName, avg_accuracy, avg_energy, avg_perfomance_score))
 
 
     
