@@ -8,7 +8,7 @@ PI_TEST_DIR = os.getenv('LPCVC_PI_TEST_DIR', '/home/dvideo/contestant-sol')
 SHELL = os.getenv('LPCVC_SHELL', 'bash')
 SHELL_EXT = '' if SHELL == 'bash' else '.' + SHELL
 SITE = os.getenv('LPCVC_SITE', os.path.expanduser('~/sites/lpcv.ai'))
-SUBMISSION_DIR = os.getenv('LPCVC_SUBMISSION_DIR', SITE + '/submissions/2021LPCVC/21lpcvc_video')
+SUBMISSION_DIR = os.getenv('LPCVC_SUBMISSION_DIR', os.path.expanduser('~/referee/winner_selection'))
 
 
 def create_test_directory():
@@ -58,6 +58,9 @@ def setup_submission(submission):
 def remove_output():
     pi_run_command("rm -rf {}/outputs && mkdir -p {}/outputs".format(PI_TEST_DIR, PI_TEST_DIR))
 
+def remove_env(env_name):
+    pi_run_command("conda env remove --name {}".format(env_name))
+
 
 def run_on_video(video):
     remove_output()
@@ -77,4 +80,5 @@ def run_on_video(video):
 
 def finish_submission(submission, sub_file_name):
     os.rename(submission, SUBMISSION_DIR + "/" + sub_file_name + ".csv")
+    remove_env(sub_file_name[:-4])
 

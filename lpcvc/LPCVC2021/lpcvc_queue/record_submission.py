@@ -55,5 +55,5 @@ def report_score(submission):
     """
     print("INFO: " + submission + " has been scored!\n\n\n\n==================\n")
     time.sleep(0.2)
-    if SITE_URL:
-        requests.get(SITE_URL + "/organizers/video20/grade/%s" % (submission,), verify=False)
+    # if SITE_URL:
+    #     requests.get(SITE_URL + "/organizers/video20/grade/%s" % (submission,), verify=False)
