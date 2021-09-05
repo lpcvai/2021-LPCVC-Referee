@@ -1,13 +1,14 @@
 import os
 import time
-
-import requests
+import csv
+from datetime import datetime
 
 from lpcvc.LPCVC2021 import DataSet, Compare
 
 SITE = os.getenv('LPCVC_SITE', os.path.expanduser('~/sites/lpcv.ai'))
 SITE_URL = os.getenv('LPCVC_SITE_URL', 'https://lpcv.ai')
 TEST_DATA_DIR = os.getenv('LPCVC_TEST_DATA_DIR', "test_data")
+SUBMISSION_DIR = os.getenv('LPCVC_SUBMISSION_DIR', os.path.expanduser('~/referee/winner_selection'))
 
 MAX_POWER = 6.28232727
 MIN_POWER = 0.000544746733
@@ -55,5 +56,31 @@ def report_score(submission):
     """
     print("INFO: " + submission + " has been scored!\n\n\n\n==================\n")
     time.sleep(0.2)
+    write_avg_score(submission)
     # if SITE_URL:
     #     requests.get(SITE_URL + "/organizers/video20/grade/%s" % (submission,), verify=False)
+
+
+def write_avg_score(submissionName):
+    with open(f"{SUBMISSION_DIR}/{submissionName}.csv") as csvFile:
+        csvData = csv.reader(csvFile)
+        next(csvData)
+        cnt = 0
+        avg_accuracy = 0
+        avg_energy = 0
+        avg_perfomance_score = 0
+        for video_name,accuracy,energy,error_status,run_time,perfomance_score in csvData:
+            avg_accuracy += float(accuracy)
+            avg_energy += float(energy)
+            avg_perfomance_score += float(perfomance_score)
+            cnt += 1
+        avg_accuracy /= cnt
+        avg_energy /= cnt
+        avg_perfomance_score /= cnt
+    print(submissionName)
+    with open(f"{SUBMISSION_DIR}/scores.csv") as score_table:
+        print('{},{},{},{},{}'.format(datetime.now(), submissionName, avg_accuracy, avg_energy, avg_perfomance_score))
+        # score_table.write('{},{},{},{},{}'.format(datetime.now(), submissionName, avg_accuracy, avg_energy, avg_perfomance_score))
+
+
+    
